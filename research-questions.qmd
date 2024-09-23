@@ -28,6 +28,10 @@ Mushrooms are vital to the general wellness of the ecosystem, decomposing and re
 
 Some data that we need to answer the question could be cap diameter (quantitative), cap shape (qualitative), stem height and width (quantitative), type of stem root and color (qualitative), ring type (qualitative), habitat (qualitative), season (qualitative), and whether the mushroom is edible or poisonous (qualitative).
 
+Data set can be found at: <https://github.com/ghattab/secondarydata/blob/main/PrimaryData/primary_data_edited.csv>
+
+Includes primary and secondary data, n = 173 and n = 61,069 respectively. Secondary data are hypothetical mushrooms generated for binary classification from the primary data set.
+
 \pagebreak
 
 ## Research Question 3
