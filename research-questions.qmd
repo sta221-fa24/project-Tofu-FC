@@ -1,6 +1,6 @@
 ---
 title: "Research Questions"
-author: "Team name - Team member 1, Team member 2, Team member 3, Team member 4"
+author: "Tofu-FC - Huiwen Wang, Rocky Zhang, Darrick Zhang"
 format: pdf
 execute: 
   warning: false
@@ -36,12 +36,20 @@ Includes primary and secondary data, n = 173 and n = 61,069 respectively. Second
 
 ## Research Question 3
 
-Diabetes
+Diabetes Factor Analysis
 
 1.  A statement of the research question.
 
+    We want to know what are some potential factors for different kinds of diabetes and to what extent does each factor contributes to or affects different kinds of diabetes.
+
 2.  The target population of interest for this question.
+
+    The target population for this research question includes adult patients diagnosed with different types of diabetes. This population should encompass a diverse range of ages, genders, ethnicities, and socioeconomic backgrounds to ensure comprehensive insights.
 
 3.  A statement about your motivation for investigating this research question and why this question is important.
 
+    Diabetes is a chronic condition that affects millions of people worldwide, leading to significant health complications and impacting quality of life. Understanding how different factors influence diabetes is critical for developing effective interventions and guidelines. This research could provide valuable insights for healthcare providers, patients, and policymakers to improve diabetes care and outcomes. By identifying key factors that positively or negatively affect diabetes, tailored recommendations can be made to help patients manage their condition more effectively, potentially reducing the incidence of complications and improving overall health.
+
 4.  Ideas about the type of data you might use to answer this question. *Note: These are your ideas about the type of data you could use. You do not need to have a data set at this point.*
+
+    We can have a dataset with a list of patients with different type of diabetes and important metrics about their general health conditions such as age, BMI, etc. as well as some potential factors related to diabetes, such as diets, genetics, etc.
