@@ -14,7 +14,13 @@ editor: visual
 
 ## Research Question 2
 
-What
+What environmental factors and physical features of mushrooms can human use to identify toxic/poisonous mushrooms in the wild?
+
+The target population of interest is mushrooms in the wild.
+
+Mushrooms are vital to the general wellness of the ecosystem, decomposing and recycling the nutrients in the soil. Mushrooms also provides a valuable food source full of nutrients for human beings and other important organisms. With this in mind, we are interested to see if there are any environmental factors and physical features of mushrooms that can help curious human avoid poisonous mushrooms that may grow in their yard. Ultimately the study of mushrooms is essential for safety and well-being.
+
+Some data that we need to answer the question could be cap diameter (quantitative), cap shape (qualitative), stem height and width (quantitative), type of stem root and color (qualitative), ring type (qualitative), habitat (qualitative), season (qualitative), and whether the mushroom is edible or poisonous (qualitative).
 
 \pagebreak
 
