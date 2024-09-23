@@ -20,11 +20,15 @@ What
 
 ## Research Question 3
 
+Diabetes Factor Analysis
+
 1.  A statement of the research question.
 
-    We want to know what are some potential factors for different kind of diabetes and to what extent does each factor contributes to
+    We want to know what are some potential factors for different kind of diabetes and to what extent does each factor contributes to different kinds of diabetes.
 
 2.  The target population of interest for this question.
+
+    The general public whose interested to know whether they are at risk to get diabetes.
 
 3.  A statement about your motivation for investigating this research question and why this question is important.
 
