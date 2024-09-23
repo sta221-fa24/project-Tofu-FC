@@ -10,6 +10,12 @@ editor: visual
 
 ## Research Question 1
 
+We are interested in investigating which factors end up impacting earnings after graduating from college, such as major choice or gender. We are also interested in seeing if there's any effect from income after graduating and unemployment rate on the choice of college majors. The target population for this research study should be those currently enrolled in, or considering enrolling in, college.
+
+Our motivation for researching this question is to better inform currently enrolled undergraduates or those considering pursuing a higher education. There has always been a sense of uncertainty as to whether a higher education is worth it. As the cost of a higher education increases, from tuition to living costs, more families are concerned about college actually being a positive return on investment. To that extent, some majors have higher median incomes than others, which can be useful information to those trying to not be entrapped in debt post-graduation.
+
+The type of data we might use for such a research question may come from universities themselves or the government, which may publish data about the earnings of their undergraduates after graduating, as well as the number of graduates and composition of graduating class in each major. There may be other data sources online which also suit our needs; the main variables we probably want included are median income after graduating, number of undergraduates enrolled in each major, unemployment rates for each major, gender statistics for each major.
+
 \pagebreak
 
 ## Research Question 2
