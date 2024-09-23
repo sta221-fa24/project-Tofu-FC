@@ -20,9 +20,9 @@ What
 
 ## Research Question 3
 
-Diabetes
-
 1.  A statement of the research question.
+
+    We want to know what are some potential factors for different kind of diabetes and to what extent does each factor contributes to
 
 2.  The target population of interest for this question.
 
