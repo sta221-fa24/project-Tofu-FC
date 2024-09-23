@@ -17,3 +17,13 @@ editor: visual
 \pagebreak
 
 ## Research Question 3
+
+Diabetes
+
+1.  A statement of the research question.
+
+2.  The target population of interest for this question.
+
+3.  A statement about your motivation for investigating this research question and why this question is important.
+
+4.  Ideas about the type of data you might use to answer this question. *Note: These are your ideas about the type of data you could use. You do not need to have a data set at this point.*
