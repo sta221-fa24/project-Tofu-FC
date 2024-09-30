@@ -33,7 +33,7 @@ Mushrooms are vital to the general wellness of the ecosystem, decomposing and re
 
 ## Data description
 
-The dataset we used can be found here: <https://www.kaggle.com/datasets/uciml/mushroom-classification/data>
+The dataset we used can be found here: [Mushroom Dataset](https://www.kaggle.com/datasets/uciml/mushroom-classification/data)
 
 The data was curated on April 26, 1987, and submitted to the UCI by the National Audubon Society Field Guide. The National Audubon Society conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms. Their research incoperate a wide range of physical characteristics, including size, shape, color, and texture of the mushrooms. Additionally, they documented environmental factors such as the type of habitat and seasonal variations. Importantly, the study also focused on the toxicity of the mushrooms, noting which species were poisonous. This comprehensive dataset provides valuable insights into the relationship between mushrooms and their environments, contributing significantly to the understanding of the factors influencing mushroom toxicity.
 
