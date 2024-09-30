@@ -1,10 +1,9 @@
 # Data
 
-If using an external dataset (that doesn't come in an R package), place data file(s) in this folder.
+This dataset includes descriptions of hypothetical samples corresponding to 23 species of gilled mushrooms in the Agaricus and Lepiota Family Mushroom drawn from The Audubon Society Field Guide to North American Mushrooms (1981). Each species is identified as definitely edible, definitely poisonous, or of unknown edibility and not recommended. This latter class was combined with the poisonous one. The Guide clearly states that there is no simple rule for determining the edibility of a mushroom; no rule like "leaflets three, let it be'' for Poisonous Oak and Ivy.
 
-Then, include metadata about your dataset including information on provenance, data dictionary, etc.
+Time period: Donated to UCI ML 27 April 1987
 
-The data dictionary for your data file(s) using the following format.
 
 ## mushroom.csv
 
