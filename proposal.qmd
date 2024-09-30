@@ -14,7 +14,7 @@ library(tidyverse)
 library(tidymodels)
 # add other packages as needed
 
-# add code to load data
+mushrooms <- read.csv("~/project-Tofu-FC/data/mushrooms.csv")
 ```
 
 ## Introduction
@@ -37,18 +37,21 @@ The dataset we used can be found here: [Mushroom Dataset](https://www.kaggle.com
 
 The data was curated on April 26, 1987, and submitted to the UCI by the National Audubon Society Field Guide. The National Audubon Society conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms. Their research incoperate a wide range of physical characteristics, including size, shape, color, and texture of the mushrooms. Additionally, they documented environmental factors such as the type of habitat and seasonal variations. Importantly, the study also focused on the toxicity of the mushrooms, noting which species were poisonous. This comprehensive dataset provides valuable insights into the relationship between mushrooms and their environments, contributing significantly to the understanding of the factors influencing mushroom toxicity.
 
-The dataset includes characteristics like cap diameter (quantitative), cap shape (qualitative), stem height and width (quantitative), type of stem root and color (qualitative), ring type (qualitative), habitat (qualitative), and whether the mushroom is edible or poisonous (qualitative). The dataset contains a varieties of mushrooms from different families and speices with any speices or family dominating the dataset.
+The dataset includes characteristics like cap diameter (quantitative), cap shape (qualitative), stem height and width (quantitative), type of stem root and color (qualitative), ring type (qualitative), habitat (qualitative), and whether the mushroom is edible or poisonous (qualitative). The dataset contains a varieties of mushrooms from different families and speices without any speices or family dominating the dataset.
 
 ## Exploratory data analysis
 
-...
+Data transformation would consist of removing any observations with N/A values in the explanatory variables (listed below) we are interested in.
+
+```{r}
+# ggplot(mushrooms, aes(x = , y= ))
+```
 
 ## Analysis approach
 
-For the first hypothesis, we select variables representing apparent physical features like "cap-color", "gill-color", "ring-type", "veil-color", and "stalk-color-below-ring" 
-as the explanatory variables.
+For the first hypothesis, we select variables representing apparent physical features like "cap-color", "gill-color", "ring-type", "veil-color", and "stalk-color-below-ring" as the explanatory variables.
 
-For the second hypothesis, we'll focus on the environmental factors, using variables "habitat" as the explanatory variables.
+For the second hypothesis, we'll focus on the environmental factors, using the "habitat" variable as the explanatory variable.
 
 For both hypotheses, we'll use logistic regression because our response variable is a binary categorical variable ("classes" can only be "e" representing "edible" or "p" representing "poisonous").
 
