@@ -14,7 +14,7 @@ library(tidyverse)
 library(tidymodels)
 # add other packages as needed
 
-mushrooms <- read.csv("~/project-Tofu-FC/data/mushrooms.csv")
+mushrooms <- read.csv2("~/project-Tofu-FC/data/mushrooms_dataset.csv")
 ```
 
 ## Introduction
@@ -29,7 +29,7 @@ Mushrooms are vital to the general wellness of the ecosystem, decomposing and re
 
 1.  Mushrooms in the wild with obvious physical features like white gills, white rings, red caps, or red stems tend to be poisonous. We want to explore this hypothesis because mushrooms with obvious physical traits are more likely to be spotted by animals, which would provide an evolutionary disadvantage unless they contain certain self-defense mechanisms, such as poison or toxins.
 
-2.  The habitat of the mushrooms would likely affect whether they're poisonous. We form this hypothesis because in specific habitats, mushrooms might face intense competition for resources such as nutrients, light, or space. Producing toxins can give them a competitive edge by inhibiting the growth of other fungi or microorganisms. In addition, different environmental conditions such as temperature, humidity, and light in various location can affect the production of secondary metabolites, including toxins.
+2.  The habitat and season of the mushrooms would likely affect whether they're poisonous. We form this hypothesis because in specific habitats, mushrooms might face intense competition for resources such as nutrients, light, or space. Producing toxins can give them a competitive edge by inhibiting the growth of other fungi or microorganisms. In addition, different environmental conditions such as temperature, humidity, and light in various location can affect the production of secondary metabolites, including toxins.
 
 ## Data description
 
@@ -49,9 +49,9 @@ Data transformation would consist of removing any observations with N/A values i
 
 ## Analysis approach
 
-For the first hypothesis, we select variables representing apparent physical features like "cap-color", "gill-color", "ring-type", "veil-color", and "stalk-color-below-ring" as the explanatory variables.
+For the first hypothesis, we select variables representing apparent physical features like "cap.color", "gill.color", "ring.type", "veil.color", "cap.diameter" (quantitative), "stem.height" and "stem.width" (quantitative) as the explanatory variables.
 
-For the second hypothesis, we'll focus on the environmental factors, using the "habitat" variable as the explanatory variable.
+For the second hypothesis, we'll focus on the environmental factors, using the "habitat" and "season" variable as the explanatory variable.
 
 For both hypotheses, we'll use logistic regression because our response variable is a binary categorical variable ("classes" can only be "e" representing "edible" or "p" representing "poisonous").
 
