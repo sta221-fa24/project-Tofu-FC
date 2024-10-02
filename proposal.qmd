@@ -30,7 +30,7 @@ Mushrooms are vital to the general wellness of the ecosystem, decomposing and re
 
 1.  Mushrooms in the wild with obvious physical features like white gills, white rings, red caps, or red stems tend to be poisonous. We want to explore this hypothesis because mushrooms with obvious physical traits are more likely to be spotted by animals, which would provide an evolutionary disadvantage unless they contain certain self-defense mechanisms, such as poison or toxins.
 
-2.  The habitat and season of the mushrooms would likely affect whether they're poisonous. We form this hypothesis because in specific habitats, mushrooms might face intense competition for resources such as nutrients, light, or space. Producing toxins can give them a competitive edge by inhibiting the growth of other fungi or microorganisms. In addition, different environmental conditions such as temperature, humidity, and light in various location can affect the production of secondary metabolites, including toxins.
+2.  The habitat and season of the mushrooms would likely affect whether they're poisonous. We form this hypothesis because in specific habitats, mushrooms might face intense competition for resources such as nutrients, light, or space. Producing toxins can give them a competitive edge by inhibiting the growth of other fungi or microorganisms. In addition, the growing season can influence the chemical composition of mushrooms. Different temperature, humidity, and light during various seasons can affect the production of secondary metabolites, including toxins. For instance, some mushrooms might produce more toxins during wet seasons to fend off increased microbial activity.
 
 ## Data description
 
@@ -38,7 +38,7 @@ The dataset we used can be found here: [Mushroom Dataset](https://www.kaggle.com
 
 The data was curated on April 26, 1987, and submitted to the UCI by the National Audubon Society Field Guide. The National Audubon Society conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms. Their research incorporate a wide range of physical characteristics, including size, shape, color, and texture of the mushrooms. Additionally, they documented environmental factors such as the type of habitat and seasonal variations. Importantly, the study also focused on the toxicity of the mushrooms, noting which species were poisonous. This comprehensive dataset provides valuable insights into the relationship between mushrooms and their environments, contributing significantly to the understanding of the factors influencing mushroom toxicity.
 
-The dataset includes characteristics like cap diameter (quantitative), cap shape (qualitative), stem height and width (quantitative), type of stem root and color (qualitative), ring type (qualitative), habitat (qualitative), and whether the mushroom is edible or poisonous (qualitative). The dataset contains a varieties of mushrooms from different families and species without any species or family dominating the dataset.
+The dataset includes characteristics like cap diameter (quantitative), cap shape (qualitative), stem height and width (quantitative), type of stem root and color (qualitative), ring-type (qualitative), habitat (qualitative), and season (qualitative), and whether the mushroom is edible or poisonous (qualitative). The dataset contains a varieties of mushrooms from different families and species without any species or family dominating the dataset.
 
 ## Exploratory data analysis
 
