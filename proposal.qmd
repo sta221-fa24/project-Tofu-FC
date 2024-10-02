@@ -88,7 +88,7 @@ ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
     title = "Distribution Stem Height vs. Stem Width Among
     Different Edibility Classes",
     y = "Stem Height (cm)",
-    x = "Stem Width (cm)",
+    x = "Stem Width (mm)",
     color = "Class (Edibile or Not)"
   ) +
   theme_minimal()
