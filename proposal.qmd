@@ -12,6 +12,7 @@ editor: visual
 #| label: load-pkg-data
 library(tidyverse)
 library(tidymodels)
+library(dbplyr)
 # add other packages as needed
 
 mushrooms <- read.csv2("~/project-Tofu-FC/data/mushrooms_dataset.csv")
@@ -35,17 +36,92 @@ Mushrooms are vital to the general wellness of the ecosystem, decomposing and re
 
 The dataset we used can be found here: [Mushroom Dataset](https://www.kaggle.com/datasets/uciml/mushroom-classification/data)
 
-The data was curated on April 26, 1987, and submitted to the UCI by the National Audubon Society Field Guide. The National Audubon Society conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms. Their research incoperate a wide range of physical characteristics, including size, shape, color, and texture of the mushrooms. Additionally, they documented environmental factors such as the type of habitat and seasonal variations. Importantly, the study also focused on the toxicity of the mushrooms, noting which species were poisonous. This comprehensive dataset provides valuable insights into the relationship between mushrooms and their environments, contributing significantly to the understanding of the factors influencing mushroom toxicity.
+The data was curated on April 26, 1987, and submitted to the UCI by the National Audubon Society Field Guide. The National Audubon Society conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms. Their research incorporate a wide range of physical characteristics, including size, shape, color, and texture of the mushrooms. Additionally, they documented environmental factors such as the type of habitat and seasonal variations. Importantly, the study also focused on the toxicity of the mushrooms, noting which species were poisonous. This comprehensive dataset provides valuable insights into the relationship between mushrooms and their environments, contributing significantly to the understanding of the factors influencing mushroom toxicity.
 
-The dataset includes characteristics like cap diameter (quantitative), cap shape (qualitative), stem height and width (quantitative), type of stem root and color (qualitative), ring type (qualitative), habitat (qualitative), and whether the mushroom is edible or poisonous (qualitative). The dataset contains a varieties of mushrooms from different families and speices without any speices or family dominating the dataset.
+The dataset includes characteristics like cap diameter (quantitative), cap shape (qualitative), stem height and width (quantitative), type of stem root and color (qualitative), ring type (qualitative), habitat (qualitative), and whether the mushroom is edible or poisonous (qualitative). The dataset contains a varieties of mushrooms from different families and species without any species or family dominating the dataset.
 
 ## Exploratory data analysis
 
-Data transformation would consist of removing any observations with N/A values in the explanatory variables (listed below) we are interested in.
+The data transformation process involves removing any observations with missing values in the explanatory variables of interest (view Analysis Approach section). However, since this dataset was previously utilized for competitions, any observations with missing values have already been excluded. As a group, we also determined that the dataset contains sufficient variables to avoid the need for joining it with another dataset. Additionally, given the limited number of quantitative variables, we opted to retain them in their original form rather than transforming them into categorical variables. Lastly, we needed to make all the variables that are quantitative into numerical data as R read them in as characters data type.
 
 ```{r}
-# ggplot(mushrooms, aes(x = , y= ))
+# Count the number of rows with at least one missing value
+num_missing_rows <- sum(rowSums(is.na(mushrooms)) > 0)
+cat("Number of rows with at least one missing value:", num_missing_rows, "\n")
+
+# Make Quantitative data numerical
+mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
+mushrooms$stem.height <- as.numeric(mushrooms$stem.height)
+mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
+
+# EDA Response (Categorical) Variable
+ggplot(mushrooms, aes(x = class)) +
+  geom_bar() +
+  labs(
+    title = "Distribution of Edibility/Classes of Mushrooms",
+    x = "Class"
+  ) +
+  theme_minimal()
+
+# Summary Statistics
+mushrooms |>
+  group_by(class) |>
+  summarise(
+    count = n(),
+    percentage = (count / nrow(mushrooms)) * 100
+  )
+
+# EDA Hypothesis 1
+ggplot(mushrooms, aes(y = class, color = gill.color)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "Distribution of Edibility vs. Gill Color",
+    x = "Count",
+    y = "Class (Edibile or Not)",
+    color = "Gill Color"
+  ) +
+  theme_minimal()
+
+ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
+  geom_point() +
+  labs(
+    title = "Distribution Stem Height vs. Stem Width Among
+    Different Edibility Classes",
+    y = "Stem Height (cm)",
+    x = "Stem Width (cm)",
+    color = "Class (Edibile or Not)"
+  ) +
+  theme_minimal()
+
+ggplot(mushrooms, aes(y = class, x = cap.diameter, color = ring.type)) +
+  geom_boxplot() +
+  labs(
+    title = "Distribution of Edibility vs. Cap Diameter Among
+    Different Ring Types",
+    x = "Cap Diameter (cm)",
+    y = "Class (Edibile or Not)",
+    color = "Ring Type"
+  ) +
+  theme_minimal()
+
+# EDA Hypothesis 2
+
+ggplot(mushrooms, aes(y = habitat, x = season, color = class)) +
+  geom_boxplot() +
+  #facet_wrap(~season) +
+  labs(
+    title = "Distribution of Edibility in Comparison 
+    to Season and Habitat",
+    x = "Season",
+    y = "Habitat Code",
+    color = "Class (Edibile or Not)"
+  ) +
+  theme_minimal()
 ```
+
+The distribution of our response variables only shows two bars in the EDA as our response variable only has 2 categories (e and p). The distribution of the two categories are not too far apart as in their counts. There is a total of 27181 observations that falls into the class e and 33888 observations that falls into class p (6707 more observations). As for the actual percentages that the class makes up in the entire dataset, class e is among 44.51% of them while class p is the remaining 55.49%.
+
+Note: The EDA for Hypothesis 1 and 2 are also shown out of curiosity!
 
 ## Analysis approach
 
