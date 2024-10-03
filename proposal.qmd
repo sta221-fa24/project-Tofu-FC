@@ -13,6 +13,7 @@ editor: visual
 library(tidyverse)
 library(tidymodels)
 library(dbplyr)
+library(knitr)
 # add other packages as needed
 
 mushrooms <- read.csv2("~/project-Tofu-FC/data/mushrooms_dataset.csv")
@@ -22,7 +23,7 @@ mushrooms <- read.csv2("~/project-Tofu-FC/data/mushrooms_dataset.csv")
 
 ### Subject Matter
 
-Mushrooms are vital to the general wellness of the ecosystem, decomposing and recycling the nutrients in the soil. Mushrooms also provides a valuable food source full of nutrients for human beings and other important organisms. However, some mushroom species can also be poisonous and harmful. With this in mind, we are interested to see whether there are any environmental factors and/or physical features of mushrooms that can help curious human avoid poisonous mushrooms that may grow in their yard. Ultimately, the study of mushrooms is essential for safety and well-being.
+Mushrooms are vital to the general wellness of the ecosystem, decomposing and recycling the nutrients in the soil. Mushrooms also provide a valuable food source full of nutrients for human beings and other important organisms. However, some mushroom species can also be poisonous and harmful. With this in mind, we are interested to see whether there are any environmental factors and/or physical features of mushrooms that can help curious human avoid poisonous mushrooms that may grow in their yard. Ultimately, the study of mushrooms is essential for safety and well-being.
 
 The importance of this research has been highlighted in a multitude of studies. Take this quote, for example:
 
@@ -75,7 +76,7 @@ mushrooms |>
   summarise(
     count = n(),
     percentage = (count / nrow(mushrooms)) * 100
-  )
+  ) |> kable(digits=3)
 
 # EDA Hypothesis 1
 ggplot(mushrooms, aes(y = class)) +
