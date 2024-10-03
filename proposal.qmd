@@ -22,9 +22,15 @@ mushrooms <- read.csv2("~/project-Tofu-FC/data/mushrooms_dataset.csv")
 
 ### Subject Matter
 
-Mushrooms are vital to the general wellness of the ecosystem, decomposing and recycling the nutrients in the soil. Mushrooms also provides a valuable food source full of nutrients for human beings and other important organisms. With this in mind, we are interested to see if there are any environmental factors and physical features of mushrooms that can help curious human avoid poisonous mushrooms that may grow in their yard. Ultimately the study of mushrooms is essential for safety and well-being.
+Mushrooms are vital to the general wellness of the ecosystem, decomposing and recycling the nutrients in the soil. Mushrooms also provides a valuable food source full of nutrients for human beings and other important organisms. However, some mushroom species can also be poisonous and harmful. With this in mind, we are interested to see whether there are any environmental factors and/or physical features of mushrooms that can help curious human avoid poisonous mushrooms that may grow in their yard. Ultimately, the study of mushrooms is essential for safety and well-being.
 
-"The ingestion of wild and potentially toxic mushrooms is common in the United States, with poison centers logging cases in the National Poison Data System (NPDS) for over 30 years. From 1999 to 2016, there were 133,700 reported cases of mushroom exposure, mostly unintentional and involving children under six years old. While the majority of cases resulted in no or minor harm, there were 704 instances of major harm and 52 fatalities, primarily due to cyclopeptide-producing mushrooms ingested unintentionally by older adults. Misidentification of edible mushroom species is a common cause of poisoning and may be preventable through education"(Brandenburg, William E, and Karlee J Ward. “Mushroom poisoning epidemiology in the United States.” Mycologia vol. 110,4 (2018): 637-641. doi:10.1080/00275514.2018.1479561). Because of this research and that of the nature, accurate classification of mushrooms is crucial for preventing poisoning incidents. Many toxic mushrooms closely resemble edible varieties, making it easy for foragers to misidentify them. So our research will focus on **what physical features and environmental factors of mushrooms human can use to identify toxic/poisonous mushrooms in the wild**. By conducting a research on how to distinguish between safe and dangerous species, we can mitigate the incidence of mushroom poisoning and ensure safer foraging practices.
+The importance of this research has been highlighted in a multitude of studies. Take this quote, for example:
+
+> The ingestion of wild and potentially toxic mushrooms is common in the United States, with poison centers logging cases in the National Poison Data System (NPDS) for over 30 years. From 1999 to 2016, there were 133,700 reported cases of mushroom exposure, mostly unintentional and involving children under six years old. While the majority of cases resulted in no or minor harm, there were 704 instances of major harm and 52 fatalities, primarily due to cyclopeptide-producing mushrooms ingested unintentionally by older adults. Misidentification of edible mushroom species is a common cause of poisoning and may be preventable through education.
+>
+> (Brandenburg, William E, and Karlee J Ward. “Mushroom poisoning epidemiology in the United States.” Mycologia vol. 110,4 (2018): 637-641. doi:10.1080/00275514.2018.1479561).
+
+As shown by studies and other similar studies, accurate classification of mushrooms is crucial for preventing poisoning incidents. Many toxic mushroom species closely resemble edible varieties, making it easy for foragers to misidentify them. Thus, our research will focus on what physical features and environmental factors of mushrooms humans can use to identify toxic/poisonous mushrooms in the wild. By conducting a research study on how to distinguish between safe and dangerous species, we can mitigate the incidence of mushroom poisoning and ensure safer foraging practices.
 
 ### Hypotheses:
 
@@ -72,20 +78,25 @@ mushrooms |>
   )
 
 # EDA Hypothesis 1
-ggplot(mushrooms, aes(y = class, color = gill.color)) +
-  geom_bar(position = "fill") +
+ggplot(mushrooms, aes(y = class)) +
+  geom_bar(aes(fill = gill.color,
+               color = gill.color,
+               alpha = 0.3)) +
   labs(
     title = "Distribution of Edibility vs. Gill Color",
     x = "Count",
     y = "Class (Edibile or Not)",
-    color = "Gill Color"
+    fill = "Gill Color"
   ) +
-  theme_minimal()
+  theme_minimal() + 
+  guides(fill = "legend", 
+         color = "none",
+         alpha = "none")
 
 ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
   geom_point() +
   labs(
-    title = "Distribution Stem Height vs. Stem Width Among
+    title = "Distribution of Stem Height vs. Stem Width Among
     Different Edibility Classes",
     y = "Stem Height (cm)",
     x = "Stem Width (cm)",
@@ -119,7 +130,7 @@ ggplot(mushrooms, aes(y = habitat, x = season, color = class)) +
   theme_minimal()
 ```
 
-The distribution of our response variables only shows two bars in the EDA as our response variable only has 2 categories (e and p). The distribution of the two categories are not too far apart as in their counts. There is a total of 27181 observations that falls into the class e and 33888 observations that falls into class p (6707 more observations). As for the actual percentages that the class makes up in the entire dataset, class e is among 44.51% of them while class p is the remaining 55.49%.
+The distribution of our response variables only shows two bars in the EDA as our response variable only has 2 categories (e=edible and p=poisonous). The distribution of the two categories are not too far apart as in their counts. There is a total of 27181 observations that falls into the class e and 33888 observations that falls into class p (6707 more observations). As for the actual percentages that the class makes up in the entire dataset, class e is among 44.51% of them while class p is the remaining 55.49%.
 
 Note: The EDA for Hypothesis 1 and 2 are also shown out of curiosity!
 
