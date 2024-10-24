@@ -146,3 +146,5 @@ For both hypotheses, we'll use logistic regression because our response variable
 ## Data dictionary
 
 The data dictionary can be found [here](https://github.com/sta221-fa24/project-Tofu-FC/blob/main/data/README.md)
+
+## References
