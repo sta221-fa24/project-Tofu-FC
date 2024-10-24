@@ -16,7 +16,7 @@ library(tidymodels)
 library(dbplyr)
 # add other packages as needed
 
-mushrooms <- read.csv2("~/project-Tofu-FC/data/mushrooms_dataset.csv")
+mushrooms <- read.csv2("data/mushrooms_dataset.csv")
 ```
 
 ## Introduction
