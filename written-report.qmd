@@ -13,6 +13,100 @@ editor: visual
 ```{r}
 #| label: load packages and data
 
+library(tidyverse)
+library(tidymodels)
+library(dbplyr)
+library(knitr)
+library(gridExtra)
+# add other packages as needed
+
+mushrooms <- read.csv2("data/mushrooms_dataset.csv")
+```
+
+```{r}
+#| label: distribution of predictors
+
+
+```
+
+```{r}
+# Count the number of rows with at least one missing value
+num_missing_rows <- sum(rowSums(is.na(mushrooms)) > 0)
+cat("Number of rows with at least one missing value:", num_missing_rows, "\n")
+
+# Make Quantitative data numerical
+mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
+mushrooms$stem.height <- as.numeric(mushrooms$stem.height)
+mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
+
+# EDA Response (Categorical) Variable
+ggplot(mushrooms, aes(x = class)) +
+  geom_bar() +
+  labs(
+    title = "Distribution of Edibility/Classes of Mushrooms",
+    x = "Class"
+  ) +
+  theme_minimal()
+
+# Summary Statistics
+mushrooms |>
+  group_by(class) |>
+  summarise(
+    count = n(),
+    percentage = (count / nrow(mushrooms)) * 100
+  ) |> kable(digits=3)
+
+# EDA Hypothesis 1
+ggplot(mushrooms, aes(y = class)) +
+  geom_bar(aes(fill = gill.color,
+               color = gill.color,
+               alpha = 0.3)) +
+  labs(
+    title = "Distribution of Edibility vs. Gill Color",
+    x = "Count",
+    y = "Class (Edibile or Not)",
+    fill = "Gill Color"
+  ) +
+  theme_minimal() + 
+  guides(fill = "legend", 
+         color = "none",
+         alpha = "none")
+
+ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
+  geom_point() +
+  labs(
+    title = "Distribution of Stem Height vs. Stem Width Among
+    Different Edibility Classes",
+    y = "Stem Height (cm)",
+    x = "Stem Width (cm)",
+    color = "Class (Edibile or Not)"
+  ) +
+  theme_minimal()
+
+ggplot(mushrooms, aes(y = class, x = cap.diameter, color = ring.type)) +
+  geom_boxplot() +
+  labs(
+    title = "Distribution of Edibility vs. Cap Diameter Among
+    Different Ring Types",
+    x = "Cap Diameter (cm)",
+    y = "Class (Edibile or Not)",
+    color = "Ring Type"
+  ) +
+  theme_minimal()
+
+# EDA Hypothesis 2
+
+ggplot(mushrooms, aes(y = habitat, x = season, color = class)) +
+  geom_boxplot() +
+  #facet_wrap(~season) +
+  labs(
+    title = "Distribution of Edibility in Comparison 
+    to Season and Habitat",
+    x = "Season",
+    y = "Habitat Code",
+    color = "Class (Edibile or Not)"
+  ) +
+  theme_minimal()
 ```
 
 Your written report goes here!
