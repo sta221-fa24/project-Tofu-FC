@@ -16,11 +16,8 @@ library(tidyverse)
 library(tidymodels)
 library(dbplyr)
 library(knitr)
-<<<<<<< HEAD
 library(GGally)
-=======
 library(gridExtra)
->>>>>>> 7c0e4c440c640880cba62364b6cc956bdf85b4b3
 # add other packages as needed
 
 mushrooms <- read.csv2("data/mushrooms_dataset.csv")
