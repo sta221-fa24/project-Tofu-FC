@@ -53,21 +53,21 @@ The data was curated on April 26, 1987, and submitted to the UCI by the National
 
 The dataset includes a lot of different characteristics and predictor variables, but many are irrelevant to our research question or induce multicollinearity in our models (for more info please visit the dataset website above). The predictor variables of interest and their description can be found below:
 
-Stem height and width (quantitative),
+Stem height and width, height or width in cm of the stem of the mushroom, both are quantitative variables of initial interest, but were remvoed as they were correlated to cap diameter (visualized with ggpairs).
 
-Cap diameter (quantitative),
+Cap diameter, diameter of the cap of the mushroom in cm, it is a quantitative variable that could help with physical identification.
 
-Cap shape (qualitative)
+Cap shape, shape of the cap of the mushroom, it is a qualitative variable that may help in the physical identification of edibility.
 
-Type of stem root and color (qualitative)
+Type of stem root and color, physical descriptions of the stem representing a qualitative variable of interest.
 
-Ring-type (qualitative)
+Ring type, qualitative variable representing the physical appearance of the ring (typically on the upper part of the stem) of a mushroom.
 
-Habitat (qualitative)
+Habitat and season, qualitative variables representing the habitat and season in which that mushroom is grown and found. These variables are used for environmental predictors for edibility.
 
-Season (qualitative)
+Our response variable is class, which is a qualitative variable of two levels representing the mushroom edibility.
 
-Our response variable is mushroom is edible or poisonous (qualitative)
+## Exploratory Data Analysis
 
 ```{r}
 #| label: distribution of predictors
