@@ -15,6 +15,7 @@ library(tidyverse)
 library(tidymodels)
 library(dbplyr)
 library(knitr)
+library(GGally)
 # add other packages as needed
 
 mushrooms <- read.csv2("data/mushrooms_dataset.csv")
@@ -77,11 +78,17 @@ mushrooms |>
     percentage = (count / nrow(mushrooms)) * 100
   ) |> kable(digits=3)
 
+# Removed Stem Heigh and Width because of multicollinearity
+mushrooms |>
+  select(cap.diameter, cap.shape, stem.root, stem.color, 
+         ring.type, habitat, season) |>
+  ggpairs()
+
 # EDA Hypothesis 1
 ggplot(mushrooms, aes(y = class)) +
   geom_bar(aes(fill = gill.color,
                color = gill.color,
-               alpha = 0.3)) +
+               alpha = 0.3), position = "fill") +
   labs(
     title = "Distribution of Edibility vs. Gill Color",
     x = "Count",
@@ -93,16 +100,16 @@ ggplot(mushrooms, aes(y = class)) +
          color = "none",
          alpha = "none")
 
-ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
-  geom_point() +
-  labs(
-    title = "Distribution of Stem Height vs. Stem Width Among
-    Different Edibility Classes",
-    y = "Stem Height (cm)",
-    x = "Stem Width (cm)",
-    color = "Class (Edibile or Not)"
-  ) +
-  theme_minimal()
+#ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
+#  geom_point() +
+#  labs(
+#    title = "Distribution of Stem Height vs. Stem Width Among
+#    Different Edibility Classes",
+#    y = "Stem Height (cm)",
+#    x = "Stem Width (cm)",
+#    color = "Class (Edibile or Not)"
+#  ) +
+#  theme_minimal()
 
 ggplot(mushrooms, aes(y = class, x = cap.diameter, color = ring.type)) +
   geom_boxplot() +
