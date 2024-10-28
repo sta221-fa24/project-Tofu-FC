@@ -56,7 +56,7 @@ p6 <- ggplot(mushrooms, aes(x = habitat)) +
 p7 <- ggplot(mushrooms, aes(x = season)) +
     geom_bar() +
     labs(title = "Season")
-grid.arrange(p1,p2,p3,p4,p5,p6,p7, heights = 4)
+grid.arrange(p1,p2,p3,p4,p5,p6,p7)
 ```
 
 ```{r}
