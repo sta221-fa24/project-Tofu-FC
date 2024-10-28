@@ -3,6 +3,7 @@ title: "Project Proposal"
 author: "Tofu-FC - Huiwen Wang, Rocky Zhang, Darrick Zhang"
 format: pdf
 execute: 
+  echo: false
   warning: false
   message: false
 editor: visual
@@ -15,6 +16,7 @@ library(tidyverse)
 library(tidymodels)
 library(dbplyr)
 library(knitr)
+library(gridExtra)
 # add other packages as needed
 
 mushrooms <- read.csv2("data/mushrooms_dataset.csv")
