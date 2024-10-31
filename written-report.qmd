@@ -54,7 +54,7 @@ The data was curated on April 26, 1987, and submitted to the UCI by the National
 
 The dataset includes a lot of different characteristics and predictor variables, but many are irrelevant to our research question or induce multicollinearity in our models (for more info please visit the dataset website above). The predictor variables of interest and their description can be found below:
 
-Stem height and width, height or width in cm of the stem of the mushroom, both are quantitative variables of initial interest, but were remvoed as they were correlated to cap diameter (visualized with ggpairs).
+Stem height and width, height or width in cm of the stem of the mushroom, both are quantitative variables of initial interest, but were removed as they were correlated to cap diameter (visualized with ggpairs).
 
 Cap diameter, diameter of the cap of the mushroom in cm, it is a quantitative variable that could help with physical identification.
 
@@ -106,6 +106,8 @@ p7 <- ggplot(mushrooms, aes(x = season)) +
 grid.arrange(p1,p2,p3,p4,p6,p7)
 ```
 
+Upon the univariate exploratory data analysis of some important predictors, there shows some interesting results. With quantitative variable, cap diameter, the distribution appears to be skewed right and unimodal. For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common, for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove), for stem color is white, yellow, and brown, for habitat, woods is the most common, and lastly for season, autumn and summer tends to be the most common.
+
 ```{r}
 #| label: bivariate EDA
 # g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
@@ -131,6 +133,8 @@ g7 <- ggplot(mushrooms, aes(x = season, fill = class)) +
 
 grid.arrange(g2,g3,g4,g6,g7)
 ```
+
+The bivariate exploratory data analysis also shows some interesting findings in particular, categories that have a disparity between the two different classes could offer potential modeling power in classification of the classes (toxicity). Cap shape of convex, bell, and others is more likely to be poisonous/toxic than edible. We also see that stem root of club and rooted tends to be poisonous, but there is relatively a low amount of observations. For stem color, yellow and brown tends to be more poisonous than not. And lastly the habitat of woods and the season of autumn and summer also observes a similar observation.
 
 ```{r}
 #| label: distribution of predictors
