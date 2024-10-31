@@ -71,6 +71,68 @@ Our response variable is class, which is a qualitative variable of two levels re
 ## Exploratory Data Analysis
 
 ```{r}
+#| label: univariate predictor distribution
+
+predictors <- c("cap.diameter", "cap.shape", "stem.root",
+                "stem.color", "ring.type", "habitat", "season")
+response_var <- "class"
+
+# Make Quantitative data numerical
+mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
+mushrooms$stem.height <- as.numeric(mushrooms$stem.height)
+mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
+
+p1 <- ggplot(mushrooms, aes(x = cap.diameter)) +
+    geom_histogram() +
+    labs(title = "Cap diameter")
+p2 <- ggplot(mushrooms, aes(x = cap.shape)) +
+    geom_bar() +
+    labs(title = "Cap shape")
+p3 <- ggplot(mushrooms, aes(x = stem.root)) +
+    geom_bar() +
+    labs(title = "Stem root")
+p4 <- ggplot(mushrooms, aes(x = stem.color)) +
+    geom_bar() +
+    labs(title = "Stem color")
+p5 <- ggplot(mushrooms, aes(x = ring.type)) +
+    geom_bar() +
+    labs(title = "Ring type")
+p6 <- ggplot(mushrooms, aes(x = habitat)) +
+    geom_bar() +
+    labs(title = "Habitat")
+p7 <- ggplot(mushrooms, aes(x = season)) +
+    geom_bar() +
+    labs(title = "Season")
+grid.arrange(p1,p2,p3,p4,p6,p7)
+```
+
+```{r}
+#| label: bivariate EDA
+# g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
+#     labs(title = "Response vs cap diameter")
+g2 <- ggplot(mushrooms, aes(x = cap.shape, fill = class)) +
+    geom_bar(position = "dodge") +
+    labs(title = "Response vs cap shape")
+g3 <- ggplot(mushrooms, aes(x = stem.root, fill = class)) +
+    geom_bar(position = "dodge") +
+    labs(title = "Response vs stem root")
+g4 <- ggplot(mushrooms, aes(x = stem.color, fill = class)) +
+    geom_bar(position = "dodge") +
+    labs(title = "Response vs stem color")
+g5 <- ggplot(mushrooms, aes(x = ring.type, fill = class)) +
+    geom_bar(position = "dodge") +
+    labs(title = "Response vs ring type")
+g6 <- ggplot(mushrooms, aes(x = habitat, fill = class)) +
+    geom_bar(position = "dodge") +
+    labs(title = "Response vs habitat")
+g7 <- ggplot(mushrooms, aes(x = season, fill = class)) +
+    geom_bar(position = "dodge") +
+    labs(title = "Response vs season")
+
+grid.arrange(g2,g3,g4,g6,g7)
+```
+
+```{r}
 #| label: distribution of predictors
 
 
