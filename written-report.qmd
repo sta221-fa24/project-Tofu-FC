@@ -8,6 +8,7 @@ execute:
   message: false
   echo: false
 editor: visual
+bibliography: references.bib
 ---
 
 ```{r}
@@ -17,6 +18,7 @@ library(tidyverse)
 library(tidymodels)
 library(dbplyr)
 library(knitr)
+library(GGally)
 library(gridExtra)
 # add other packages as needed
 
@@ -53,37 +55,79 @@ The data was curated on April 26, 1987, and submitted to the UCI by the National
 
 The dataset includes a lot of different characteristics and predictor variables, but many are irrelevant to our research question or induce multicollinearity in our models (for more info please visit the dataset website above). The predictor variables of interest and their description can be found below:
 
-Stem height and width (quantitative),
+Stem height and width, height or width in cm of the stem of the mushroom, both are quantitative variables of initial interest that may help with physical identification.
 
-Cap diameter (quantitative),
+Cap diameter, diameter of the cap of the mushroom in cm, it is a quantitative variable that could also help with physical identification.
 
-Cap shape (qualitative)
+Cap shape, shape of the cap of the mushroom, it is a qualitative variable that may help in the physical identification of edibility.
 
-Type of stem root and color (qualitative)
+Type of stem root and color, physical descriptions of the stem representing a qualitative variable of interest.
 
-Ring-type (qualitative)
+Ring type, qualitative variable representing the physical appearance of the ring (typically on the upper part of the stem) of a mushroom.
 
-Habitat (qualitative)
+Habitat and season, qualitative variables representing the habitat and season in which that mushroom is grown and found. These variables are used for environmental predictors for edibility.
 
-Season (qualitative)
+Our response variable is class, which is a qualitative variable of two levels representing the mushroom edibility.
 
-Our response variable is mushroom is edible or poisonous (qualitative)
-
-```{r}
-#| label: distribution of predictors
-
-
-```
+## Exploratory Data Analysis
 
 ```{r}
+#| label: check rows
+
 # Count the number of rows with at least one missing value
 num_missing_rows <- sum(rowSums(is.na(mushrooms)) > 0)
 cat("Number of rows with at least one missing value:", num_missing_rows, "\n")
+```
+
+Before we do any EDA, we check that there are no rows with missing values.
+
+```{r}
+#| label: data manipulation, multicolinearity
 
 # Make Quantitative data numerical
 mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
 mushrooms$stem.height <- as.numeric(mushrooms$stem.height)
 mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
+
+mushrooms |>
+  select(cap.diameter, stem.height, stem.width) |>
+  ggpairs()
+
+# final predictors <- c("cap.diameter", "cap.shape", "stem.root",
+#                 "stem.color", "habitat", "season")
+# response_var <- "class"
+```
+
+We were first interested in seeing the relationship between our continuous, quantitative variables. While not totally linear, with correlations of \$0.423\$ and \$0.436\$, they graphs seem to be somewhat linear, with some redundancy in their information. Thus, for the rest of the EDA we will focus mainly on visualizing cap.diameter. We may consider adding them back for the final model, but were more interested in seeing some of the EDA with the categorical variables.
+
+```{r}
+#| label: univariate predictors
+
+p1 <- ggplot(mushrooms, aes(x = cap.diameter)) +
+    geom_histogram() +
+    labs(title = "Cap diameter")
+p2 <- ggplot(mushrooms, aes(x = cap.shape)) +
+    geom_bar() +
+    labs(title = "Cap shape")
+p3 <- ggplot(mushrooms, aes(x = stem.root)) +
+    geom_bar() +
+    labs(title = "Stem root")
+p4 <- ggplot(mushrooms, aes(x = stem.color)) +
+    geom_bar() +
+    labs(title = "Stem color")
+p5 <- ggplot(mushrooms, aes(x = habitat)) +
+    geom_bar() +
+    labs(title = "Habitat")
+p6 <- ggplot(mushrooms, aes(x = season)) +
+    geom_bar() +
+    labs(title = "Season")
+grid.arrange(p1,p2,p3,p4,p5,p6)
+```
+
+To visualize the distribution of some of our predictor variables, we use a histogram for our continuous variable `cap.diameter` and bar graphs for our categorical variables. The distribution of cap diameter seems to be unimodal, skewed right. From the For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common; for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove); for stem color the most common is white, yellow, and brown; for habitat, woods is the most common; for season, autumn and summer tends to be the most common.
+
+```{r}
+#| label: univariate response variable
 
 # EDA Response (Categorical) Variable
 ggplot(mushrooms, aes(x = class)) +
@@ -101,7 +145,65 @@ mushrooms |>
     count = n(),
     percentage = (count / nrow(mushrooms)) * 100
   ) |> kable(digits=3)
+```
 
+Looking at the overall distribution of our response variable `class`, most of the mushrooms in our dataset seem to be poisonous ("p"). 33888 of the observations, or 55.5% of them are labeled poisonous, as opposed to 27181 (44.5%) of them as edible.
+
+```{r}
+#| label: bivariate EDA
+g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
+    geom_boxplot() +
+    labs(title = "Response vs cap diameter")
+g2 <- ggplot(mushrooms, aes(x = cap.shape, fill = class)) +
+    geom_bar(position = "dodge") +
+    labs(title = "Response vs cap shape")
+g3 <- ggplot(mushrooms, aes(x = stem.root, fill = class)) +
+    geom_bar(position = "dodge") +
+    labs(title = "Response vs stem root")
+g4 <- ggplot(mushrooms, aes(x = stem.color, fill = class)) +
+    geom_bar(position = "dodge") +
+    labs(title = "Response vs stem color")
+g5 <- ggplot(mushrooms, aes(x = habitat, fill = class)) +
+    geom_bar(position = "dodge") +
+    labs(title = "Response vs habitat")
+g6 <- ggplot(mushrooms, aes(x = season, fill = class)) +
+    geom_bar(position = "dodge") +
+    labs(title = "Response vs season")
+
+grid.arrange(g1,g2,g3,g4,g5,g6)
+```
+
+The bivariate exploratory data analysis also shows some interesting findings for predictors. In particular, categories that have a disparity between the two different classes could offer potential modeling power in classification of the classes (toxicity). Larger, more extreme cap diameter is often linked to edibility. Cap shape of convex, bell, and others is more likely to be poisonous/toxic than edible. We also see that stem root of club and rooted tends to be poisonous, but there is relatively a low amount of observations. For stem color, yellow and brown tends to be more poisonous than not. And lastly the habitat of woods and the season of autumn and summer also observes a similar observation.
+
+```{r}
+#| label: analysis of interaction
+
+ggplot(mushrooms, aes(x = habitat, fill = class)) +
+  geom_bar(position = "fill") + 
+  facet_wrap(~ season) +
+  labs(title = "Edibility Distribution by Habitat and Season",
+       x = "Habitat",
+       y = "Proportion of Edibility") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(mushrooms, aes(x = cap.color, y = cap.shape, fill = class)) +
+  geom_tile() +
+  labs(title = "Cap Color and Shape Combinations by Edibility",
+       x = "Cap Color",
+       y = "Cap Shape") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+We believe that these predictors may have potential interactive effects that could help us with our model to predict edibility of mushrooms.
+
+**Habitat × Season**: Mushrooms in certain habitats might only be edible during specific seasons.
+
+**Cap color × Cap shape**: Some combinations of cap color and shape may signal edibility more strongly than either feature alone.
+
+```{r}
+#| label: multivariate EDA
 # EDA Hypothesis 1
 ggplot(mushrooms, aes(y = class)) +
   geom_bar(aes(fill = gill.color,
@@ -155,8 +257,8 @@ ggplot(mushrooms, aes(y = habitat, x = season, color = class)) +
   theme_minimal()
 ```
 
-Your written report goes here!
+## Data dictionary
 
-::: callout-important
-Before you submit, make sure your code chunks are turned off with `echo: false` and there are no warnings or messages with `warning: false` and `message: false` in the YAML.
-:::
+The data dictionary can be found [here](https://github.com/sta221-fa24/project-Tofu-FC/blob/main/data/README.md)
+
+## References
