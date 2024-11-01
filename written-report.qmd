@@ -82,51 +82,6 @@ cat("Number of rows with at least one missing value:", num_missing_rows, "\n")
 Before we do any EDA, we check that there are no rows with missing values.
 
 ```{r}
-#| label: data manipulation, multicolinearity
-
-# Make Quantitative data numerical
-mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
-mushrooms$stem.height <- as.numeric(mushrooms$stem.height)
-mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
-
-mushrooms |>
-  select(cap.diameter, stem.height, stem.width) |>
-  ggpairs()
-
-# final predictors <- c("cap.diameter", "cap.shape", "stem.root",
-#                 "stem.color", "habitat", "season")
-# response_var <- "class"
-```
-
-We were first interested in seeing the relationship between our continuous, quantitative variables. While not totally linear, with correlations of \$0.423\$ and \$0.436\$, they graphs seem to be somewhat linear, with some redundancy in their information. Thus, for the rest of the EDA we will focus mainly on visualizing cap.diameter. We may consider adding them back for the final model, but were more interested in seeing some of the EDA with the categorical variables.
-
-```{r}
-#| label: univariate predictors
-
-p1 <- ggplot(mushrooms, aes(x = cap.diameter)) +
-    geom_histogram() +
-    labs(title = "Cap diameter")
-p2 <- ggplot(mushrooms, aes(x = cap.shape)) +
-    geom_bar() +
-    labs(title = "Cap shape")
-p3 <- ggplot(mushrooms, aes(x = stem.root)) +
-    geom_bar() +
-    labs(title = "Stem root")
-p4 <- ggplot(mushrooms, aes(x = stem.color)) +
-    geom_bar() +
-    labs(title = "Stem color")
-p5 <- ggplot(mushrooms, aes(x = habitat)) +
-    geom_bar() +
-    labs(title = "Habitat")
-p6 <- ggplot(mushrooms, aes(x = season)) +
-    geom_bar() +
-    labs(title = "Season")
-grid.arrange(p1,p2,p3,p4,p5,p6)
-```
-
-To visualize the distribution of some of our predictor variables, we use a histogram for our continuous variable `cap.diameter` and bar graphs for our categorical variables. The distribution of cap diameter seems to be unimodal, skewed right. From the For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common; for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove); for stem color the most common is white, yellow, and brown; for habitat, woods is the most common; for season, autumn and summer tends to be the most common.
-
-```{r}
 #| label: univariate response variable
 
 # EDA Response (Categorical) Variable
@@ -150,6 +105,60 @@ mushrooms |>
 Looking at the overall distribution of our response variable `class`, most of the mushrooms in our dataset seem to be poisonous ("p"). 33888 of the observations, or 55.5% of them are labeled poisonous, as opposed to 27181 (44.5%) of them as edible.
 
 ```{r}
+#| label: data manipulation, multicolinearity
+
+# Make Quantitative data numerical
+mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
+mushrooms$stem.height <- as.numeric(mushrooms$stem.height)
+mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
+
+mushrooms |>
+  select(cap.diameter, stem.height, stem.width) |>
+  ggpairs()
+
+# final predictors <- c("cap.diameter", "cap.shape", "stem.root",
+#                 "stem.color", "habitat", "season")
+# response_var <- "class"
+```
+
+We were first interested in seeing the relationship between our continuous, quantitative variables. While not totally linear, with correlations of \$0.423\$ and \$0.436\$, they graphs seem to be somewhat linear, with some redundancy in their information. Thus, for the rest of the EDA we will focus mainly on visualizing cap.diameter. We may consider adding them back for the final model, but were more interested in seeing some of the EDA with the categorical variables.
+
+```{r}
+#| label: univariate predictors
+
+p1 <- ggplot(mushrooms, aes(x = cap.diameter)) +
+    geom_histogram() +
+    labs(title = "Cap diameter",
+         x="Cap diameter")
+p2 <- ggplot(mushrooms, aes(x = cap.shape)) +
+    geom_bar() +
+    labs(title = "Cap shape",
+         x="Cap shape")
+# p3 <- ggplot(mushrooms, aes(x = stem.root)) +
+#     geom_bar() +
+#     labs(title = "Stem root")
+p3 <- ggplot(mushrooms, aes(x = gill.color)) +
+    geom_bar() +
+    labs(title = "Gill color",
+         x="Gill color")
+p4 <- ggplot(mushrooms, aes(x = stem.color)) +
+    geom_bar() +
+    labs(title = "Stem color",
+         x="Stem color")
+p5 <- ggplot(mushrooms, aes(x = habitat)) +
+    geom_bar() +
+    labs(title = "Habitat",
+         x="Habitat")
+p6 <- ggplot(mushrooms, aes(x = season)) +
+    geom_bar() +
+    labs(title = "Season",
+         x="Season")
+grid.arrange(p1,p2,p3,p4,p5,p6)
+```
+
+To visualize the distribution of some of our predictor variables, we use a histogram for our continuous variable `cap.diameter` and bar graphs for our categorical variables. The distribution of cap diameter seems to be unimodal, skewed right. From the For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common; for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove); for stem color the most common is white, yellow, and brown; for habitat, woods is the most common; for season, autumn and summer tends to be the most common.
+
+```{r}
 #| label: bivariate EDA
 g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
     geom_boxplot() +
@@ -157,9 +166,12 @@ g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
 g2 <- ggplot(mushrooms, aes(x = cap.shape, fill = class)) +
     geom_bar(position = "dodge") +
     labs(title = "Response vs cap shape")
-g3 <- ggplot(mushrooms, aes(x = stem.root, fill = class)) +
+g3 <- ggplot(mushrooms, aes(x = gill.color, fill = class)) +
     geom_bar(position = "dodge") +
-    labs(title = "Response vs stem root")
+    labs(title = "Response vs gill color")
+# g3 <- ggplot(mushrooms, aes(x = stem.root, fill = class)) +
+#     geom_bar(position = "dodge") +
+#     labs(title = "Response vs stem root")
 g4 <- ggplot(mushrooms, aes(x = stem.color, fill = class)) +
     geom_bar(position = "dodge") +
     labs(title = "Response vs stem color")
@@ -204,22 +216,6 @@ We believe that these predictors may have potential interactive effects that cou
 
 ```{r}
 #| label: multivariate EDA
-# EDA Hypothesis 1
-ggplot(mushrooms, aes(y = class)) +
-  geom_bar(aes(fill = gill.color,
-               color = gill.color,
-               alpha = 0.3)) +
-  labs(
-    title = "Distribution of Edibility vs. Gill Color",
-    x = "Count",
-    y = "Class (Edibile or Not)",
-    fill = "Gill Color"
-  ) +
-  theme_minimal() + 
-  guides(fill = "legend", 
-         color = "none",
-         alpha = "none")
-
 ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
   geom_point() +
   labs(
@@ -230,32 +226,9 @@ ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
     color = "Class (Edibile or Not)"
   ) +
   theme_minimal()
-
-ggplot(mushrooms, aes(y = class, x = cap.diameter, color = ring.type)) +
-  geom_boxplot() +
-  labs(
-    title = "Distribution of Edibility vs. Cap Diameter Among
-    Different Ring Types",
-    x = "Cap Diameter (cm)",
-    y = "Class (Edibile or Not)",
-    color = "Ring Type"
-  ) +
-  theme_minimal()
-
-# EDA Hypothesis 2
-
-ggplot(mushrooms, aes(y = habitat, x = season, color = class)) +
-  geom_boxplot() +
-  #facet_wrap(~season) +
-  labs(
-    title = "Distribution of Edibility in Comparison 
-    to Season and Habitat",
-    x = "Season",
-    y = "Habitat Code",
-    color = "Class (Edibile or Not)"
-  ) +
-  theme_minimal()
 ```
+
+Finally, we look at multivariate data analysis including 2 predictors and our response variable. While the distribution of stem width and stem height seemed to be the same as cap diameter, and there may be some potential multicolinearity, we are still interested in visualizing their effect on the edibility of the mushroom. Here, we visualize the effect of both stem width and stem height on the response variable, `class`. Interestingly, it seems like mushrooms with either high stem width or stem height seem to be edible.
 
 ## Data dictionary
 
