@@ -102,6 +102,18 @@ ggplot(mushrooms, aes(y = class)) +
          color = "none",
          alpha = "none")
 
+<<<<<<< HEAD
+ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
+  geom_point() +
+  labs(
+    title = "Distribution of Stem Height vs. Stem Width Among
+    Different Edibility Classes",
+    y = "Stem Height (cm)",
+    x = "Stem Width (mm)",
+    color = "Class (Edibile or Not)"
+  ) +
+  theme_minimal()
+=======
 #ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
 #  geom_point() +
 #  labs(
@@ -112,6 +124,7 @@ ggplot(mushrooms, aes(y = class)) +
 #    color = "Class (Edibile or Not)"
 #  ) +
 #  theme_minimal()
+>>>>>>> 967d0d5e602f53fc5b421f631a2a5c69c1bea3b2
 
 ggplot(mushrooms, aes(y = class, x = cap.diameter, color = ring.type)) +
   geom_boxplot() +
