@@ -18,6 +18,7 @@ library(tidyverse)
 library(tidymodels)
 library(dbplyr)
 library(knitr)
+library(GGally)
 library(gridExtra)
 # add other packages as needed
 
@@ -54,9 +55,9 @@ The data was curated on April 26, 1987, and submitted to the UCI by the National
 
 The dataset includes a lot of different characteristics and predictor variables, but many are irrelevant to our research question or induce multicollinearity in our models (for more info please visit the dataset website above). The predictor variables of interest and their description can be found below:
 
-Stem height and width, height or width in cm of the stem of the mushroom, both are quantitative variables of initial interest, but were removed as they were correlated to cap diameter (visualized with ggpairs).
+Stem height and width, height or width in cm of the stem of the mushroom, both are quantitative variables of initial interest that may help with physical identification.
 
-Cap diameter, diameter of the cap of the mushroom in cm, it is a quantitative variable that could help with physical identification.
+Cap diameter, diameter of the cap of the mushroom in cm, it is a quantitative variable that could also help with physical identification.
 
 Cap shape, shape of the cap of the mushroom, it is a qualitative variable that may help in the physical identification of edibility.
 
@@ -71,16 +72,36 @@ Our response variable is class, which is a qualitative variable of two levels re
 ## Exploratory Data Analysis
 
 ```{r}
-#| label: univariate predictor distribution
+#| label: check rows
 
-predictors <- c("cap.diameter", "cap.shape", "stem.root",
-                "stem.color", "ring.type", "habitat", "season")
-response_var <- "class"
+# Count the number of rows with at least one missing value
+num_missing_rows <- sum(rowSums(is.na(mushrooms)) > 0)
+cat("Number of rows with at least one missing value:", num_missing_rows, "\n")
+```
+
+Before we do any EDA, we check that there are no rows with missing values.
+
+```{r}
+#| label: data manipulation, multicolinearity
 
 # Make Quantitative data numerical
 mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
 mushrooms$stem.height <- as.numeric(mushrooms$stem.height)
 mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
+
+mushrooms |>
+  select(cap.diameter, stem.height, stem.width) |>
+  ggpairs()
+
+# final predictors <- c("cap.diameter", "cap.shape", "stem.root",
+#                 "stem.color", "habitat", "season")
+# response_var <- "class"
+```
+
+We were first interested in seeing the relationship between our continuous, quantitative variables. While not totally linear, with correlations of \$0.423\$ and \$0.436\$, they graphs seem to be somewhat linear, with some redundancy in their information. Thus, for the rest of the EDA we will focus mainly on visualizing cap.diameter. We may consider adding them back for the final model, but were more interested in seeing some of the EDA with the categorical variables.
+
+```{r}
+#| label: univariate predictors
 
 p1 <- ggplot(mushrooms, aes(x = cap.diameter)) +
     geom_histogram() +
@@ -94,19 +115,39 @@ p3 <- ggplot(mushrooms, aes(x = stem.root)) +
 p4 <- ggplot(mushrooms, aes(x = stem.color)) +
     geom_bar() +
     labs(title = "Stem color")
-p5 <- ggplot(mushrooms, aes(x = ring.type)) +
-    geom_bar() +
-    labs(title = "Ring type")
-p6 <- ggplot(mushrooms, aes(x = habitat)) +
+p5 <- ggplot(mushrooms, aes(x = habitat)) +
     geom_bar() +
     labs(title = "Habitat")
-p7 <- ggplot(mushrooms, aes(x = season)) +
+p6 <- ggplot(mushrooms, aes(x = season)) +
     geom_bar() +
     labs(title = "Season")
-grid.arrange(p1,p2,p3,p4,p6,p7)
+grid.arrange(p1,p2,p3,p4,p5,p6)
 ```
 
-Upon the univariate exploratory data analysis of some important predictors (did not include the other 2 quantitative variable and ring type because the former are collinear with cap diameter via VIFs analysis and the latter is less typically known by the common person), there shows some interesting results. With quantitative variable, cap diameter, the distribution appears to be skewed right and unimodal. For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common, for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove), for stem color is white, yellow, and brown, for habitat, woods is the most common, and lastly for season, autumn and summer tends to be the most common.
+To visualize the distribution of some of our predictor variables, we use a histogram for our continuous variable `cap.diameter` and bar graphs for our categorical variables. The distribution of cap diameter seems to be unimodal, skewed right. From the For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common; for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove); for stem color the most common is white, yellow, and brown; for habitat, woods is the most common; for season, autumn and summer tends to be the most common.
+
+```{r}
+#| label: univariate response variable
+
+# EDA Response (Categorical) Variable
+ggplot(mushrooms, aes(x = class)) +
+  geom_bar() +
+  labs(
+    title = "Distribution of Edibility/Classes of Mushrooms",
+    x = "Class"
+  ) +
+  theme_minimal()
+
+# Summary Statistics
+mushrooms |>
+  group_by(class) |>
+  summarise(
+    count = n(),
+    percentage = (count / nrow(mushrooms)) * 100
+  ) |> kable(digits=3)
+```
+
+Looking at the overall distribution of our response variable `class`, most of the mushrooms in our dataset seem to be poisonous ("p"). 33888 of the observations, or 55.5% of them are labeled poisonous, as opposed to 27181 (44.5%) of them as edible.
 
 ```{r}
 #| label: bivariate EDA
@@ -122,20 +163,17 @@ g3 <- ggplot(mushrooms, aes(x = stem.root, fill = class)) +
 g4 <- ggplot(mushrooms, aes(x = stem.color, fill = class)) +
     geom_bar(position = "dodge") +
     labs(title = "Response vs stem color")
-g5 <- ggplot(mushrooms, aes(x = ring.type, fill = class)) +
-    geom_bar(position = "dodge") +
-    labs(title = "Response vs ring type")
-g6 <- ggplot(mushrooms, aes(x = habitat, fill = class)) +
+g5 <- ggplot(mushrooms, aes(x = habitat, fill = class)) +
     geom_bar(position = "dodge") +
     labs(title = "Response vs habitat")
-g7 <- ggplot(mushrooms, aes(x = season, fill = class)) +
+g6 <- ggplot(mushrooms, aes(x = season, fill = class)) +
     geom_bar(position = "dodge") +
     labs(title = "Response vs season")
 
-grid.arrange(g1,g2,g3,g4,g6,g7)
+grid.arrange(g1,g2,g3,g4,g5,g6)
 ```
 
-The bivariate exploratory data analysis also shows some interesting findings for predictors we are most interested in. In particular, categories that have a disparity between the two different classes could offer potential modeling power in classification of the classes (toxicity). Larger, more extreme cap diameter is often linked to edibility. Cap shape of convex, bell, and others is more likely to be poisonous/toxic than edible. We also see that stem root of club and rooted tends to be poisonous, but there is relatively a low amount of observations. For stem color, yellow and brown tends to be more poisonous than not. And lastly the habitat of woods and the season of autumn and summer also observes a similar observation.
+The bivariate exploratory data analysis also shows some interesting findings for predictors. In particular, categories that have a disparity between the two different classes could offer potential modeling power in classification of the classes (toxicity). Larger, more extreme cap diameter is often linked to edibility. Cap shape of convex, bell, and others is more likely to be poisonous/toxic than edible. We also see that stem root of club and rooted tends to be poisonous, but there is relatively a low amount of observations. For stem color, yellow and brown tends to be more poisonous than not. And lastly the habitat of woods and the season of autumn and summer also observes a similar observation.
 
 ```{r}
 #| label: analysis of interaction
@@ -165,32 +203,7 @@ We believe that these predictors may have potential interactive effects that cou
 **Cap color × Cap shape**: Some combinations of cap color and shape may signal edibility more strongly than either feature alone.
 
 ```{r}
-# Count the number of rows with at least one missing value
-num_missing_rows <- sum(rowSums(is.na(mushrooms)) > 0)
-cat("Number of rows with at least one missing value:", num_missing_rows, "\n")
-
-# Make Quantitative data numerical
-mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
-mushrooms$stem.height <- as.numeric(mushrooms$stem.height)
-mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
-
-# EDA Response (Categorical) Variable
-ggplot(mushrooms, aes(x = class)) +
-  geom_bar() +
-  labs(
-    title = "Distribution of Edibility/Classes of Mushrooms",
-    x = "Class"
-  ) +
-  theme_minimal()
-
-# Summary Statistics
-mushrooms |>
-  group_by(class) |>
-  summarise(
-    count = n(),
-    percentage = (count / nrow(mushrooms)) * 100
-  ) |> kable(digits=3)
-
+#| label: multivariate EDA
 # EDA Hypothesis 1
 ggplot(mushrooms, aes(y = class)) +
   geom_bar(aes(fill = gill.color,
