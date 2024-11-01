@@ -139,36 +139,42 @@ p6 <- ggplot(mushrooms, aes(x = season)) +
 grid.arrange(p1,p2,p3,p4,p5,p6)
 ```
 
-To visualize the distribution of some of our predictor variables, we use a histogram for our continuous variable `cap.diameter` and bar graphs for our categorical variables. The distribution of cap diameter seems to be unimodal, skewed right. From the For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common; for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove); for stem color the most common is white, yellow, and brown; for habitat, woods is the most common; for season, autumn and summer tends to be the most common.
+To visualize the distribution of some of our predictor variables, we use a histogram for our continuous variable `cap.diameter` and bar graphs for our categorical variables. The distribution of cap diameter seems to be unimodal, skewed right. From the qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common; for stem root (originally included) the most common was "missing data" (which likely suggests that this was a variable to remove); for gill color the most common was white, yellow, and brown; for stem color the most common is white, yellow, and brown; for habitat, woods is the most common; for season, autumn and summer tends to be the most common.
 
 ```{r}
 #| label: bivariate EDA
 g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
     geom_boxplot() +
-    labs(title = "Response vs cap diameter")
+    labs(title = "Response vs cap diameter",
+         x = "Cap diameter")
 g2 <- ggplot(mushrooms, aes(x = cap.shape, fill = class)) +
     geom_bar(position = "dodge") +
-    labs(title = "Response vs cap shape")
+    labs(title = "Response vs cap shape",
+         x = "Cap shape")
 g3 <- ggplot(mushrooms, aes(x = gill.color, fill = class)) +
     geom_bar(position = "dodge") +
-    labs(title = "Response vs gill color")
+    labs(title = "Response vs gill color",
+         x = "Gill color")
 # g3 <- ggplot(mushrooms, aes(x = stem.root, fill = class)) +
 #     geom_bar(position = "dodge") +
 #     labs(title = "Response vs stem root")
 g4 <- ggplot(mushrooms, aes(x = stem.color, fill = class)) +
     geom_bar(position = "dodge") +
-    labs(title = "Response vs stem color")
+    labs(title = "Response vs stem color",
+         x ="Stem color")
 g5 <- ggplot(mushrooms, aes(x = habitat, fill = class)) +
     geom_bar(position = "dodge") +
-    labs(title = "Response vs habitat")
+    labs(title = "Response vs habitat",
+         x = "Habitat")
 g6 <- ggplot(mushrooms, aes(x = season, fill = class)) +
     geom_bar(position = "dodge") +
-    labs(title = "Response vs season")
+    labs(title = "Response vs season",
+         x = "Season")
 
 grid.arrange(g1,g2,g3,g4,g5,g6)
 ```
 
-The bivariate exploratory data analysis also shows some interesting findings for predictors. In particular, categories that have a disparity between the two different classes could offer potential modeling power in classification of the classes (toxicity). Larger, more extreme cap diameter is often linked to edibility. Cap shape of convex, bell, and others is more likely to be poisonous/toxic than edible. We also see that stem root of club and rooted tends to be poisonous, but there is relatively a low amount of observations. For stem color, yellow and brown tends to be more poisonous than not. And lastly the habitat of woods and the season of autumn and summer also observes a similar observation.
+The bivariate exploratory data analysis also shows some interesting findings for predictors. In particular, categories that have a disparity between the two different classes could offer potential modeling power in classification of the classes (toxicity). Larger, more extreme cap diameter is often linked to edibility. Cap shape of convex, bell, and others is more likely to be poisonous/toxic than edible. We also see that gill color of brown and yellow tends to be poisonous. For stem color, yellow and brown tends to be more poisonous than not. And lastly the habitat of woods and the season of autumn and summer also observes a similar observation.
 
 ```{r}
 #| label: analysis of interaction
@@ -191,11 +197,11 @@ ggplot(mushrooms, aes(x = cap.color, y = cap.shape, fill = class)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-We believe that these predictors may have potential interactive effects that could help us with our model to predict edibility of mushrooms.
+We believe that these predictors may have potential interactive effects that could help us with our model to predict edibility of mushrooms due to the fact that certain more specific characteristics tends to be poisonous.
 
-**Habitat × Season**: Mushrooms in certain habitats might only be edible during specific seasons.
+**Habitat × Season**: Our EDA reveals that mushrooms in certain habitats might only be edible during specific seasons.
 
-**Cap color × Cap shape**: Some combinations of cap color and shape may signal edibility more strongly than either feature alone.
+**Cap color × Cap shape**: Additionally, some combinations of cap color and shape may signal edibility more strongly than either feature alone.
 
 ```{r}
 #| label: multivariate EDA
