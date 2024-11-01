@@ -106,12 +106,13 @@ p7 <- ggplot(mushrooms, aes(x = season)) +
 grid.arrange(p1,p2,p3,p4,p6,p7)
 ```
 
-Upon the univariate exploratory data analysis of some important predictors, there shows some interesting results. With quantitative variable, cap diameter, the distribution appears to be skewed right and unimodal. For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common, for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove), for stem color is white, yellow, and brown, for habitat, woods is the most common, and lastly for season, autumn and summer tends to be the most common.
+Upon the univariate exploratory data analysis of some important predictors (did not include the other 2 quantitative variable and ring type because the former are collinear with cap diameter via VIFs analysis and the latter is less typically known by the common person), there shows some interesting results. With quantitative variable, cap diameter, the distribution appears to be skewed right and unimodal. For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common, for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove), for stem color is white, yellow, and brown, for habitat, woods is the most common, and lastly for season, autumn and summer tends to be the most common.
 
 ```{r}
 #| label: bivariate EDA
-# g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
-#     labs(title = "Response vs cap diameter")
+g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
+    geom_boxplot() +
+    labs(title = "Response vs cap diameter")
 g2 <- ggplot(mushrooms, aes(x = cap.shape, fill = class)) +
     geom_bar(position = "dodge") +
     labs(title = "Response vs cap shape")
@@ -131,16 +132,37 @@ g7 <- ggplot(mushrooms, aes(x = season, fill = class)) +
     geom_bar(position = "dodge") +
     labs(title = "Response vs season")
 
-grid.arrange(g2,g3,g4,g6,g7)
+grid.arrange(g1,g2,g3,g4,g6,g7)
 ```
 
-The bivariate exploratory data analysis also shows some interesting findings in particular, categories that have a disparity between the two different classes could offer potential modeling power in classification of the classes (toxicity). Cap shape of convex, bell, and others is more likely to be poisonous/toxic than edible. We also see that stem root of club and rooted tends to be poisonous, but there is relatively a low amount of observations. For stem color, yellow and brown tends to be more poisonous than not. And lastly the habitat of woods and the season of autumn and summer also observes a similar observation.
+The bivariate exploratory data analysis also shows some interesting findings for predictors we are most interested in. In particular, categories that have a disparity between the two different classes could offer potential modeling power in classification of the classes (toxicity). Larger, more extreme cap diameter is often linked to edibility. Cap shape of convex, bell, and others is more likely to be poisonous/toxic than edible. We also see that stem root of club and rooted tends to be poisonous, but there is relatively a low amount of observations. For stem color, yellow and brown tends to be more poisonous than not. And lastly the habitat of woods and the season of autumn and summer also observes a similar observation.
 
 ```{r}
-#| label: distribution of predictors
+#| label: analysis of interaction
 
+ggplot(mushrooms, aes(x = habitat, fill = class)) +
+  geom_bar(position = "fill") + 
+  facet_wrap(~ season) +
+  labs(title = "Edibility Distribution by Habitat and Season",
+       x = "Habitat",
+       y = "Proportion of Edibility") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+ggplot(mushrooms, aes(x = cap.color, y = cap.shape, fill = class)) +
+  geom_tile() +
+  labs(title = "Cap Color and Shape Combinations by Edibility",
+       x = "Cap Color",
+       y = "Cap Shape") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+We believe that these predictors may have potential interactive effects that could help us with our model to predict edibility of mushrooms.
+
+**Habitat × Season**: Mushrooms in certain habitats might only be edible during specific seasons.
+
+**Cap color × Cap shape**: Some combinations of cap color and shape may signal edibility more strongly than either feature alone.
 
 ```{r}
 # Count the number of rows with at least one missing value
