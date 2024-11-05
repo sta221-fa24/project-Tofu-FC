@@ -47,15 +47,31 @@ Mushrooms in the wild with obvious physical features like white gills, white rin
 
 ### Data Description:
 
-The dataset we used can be found here: [Mushroom Dataset](https://www.kaggle.com/datasets/uciml/mushroom-classification/data)
-
 The data was curated on April 26, 1987, and submitted to the UCI by the National Audubon Society Field Guide. The National Audubon Society conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms. Their research incorporate a wide range of physical characteristics, including size, shape, color, and texture of the mushrooms. Additionally, they documented environmental factors such as the type of habitat and seasonal variations. Importantly, the study also focused on the toxicity of the mushrooms, noting which species were poisonous. This comprehensive dataset provides valuable insights into the relationship between mushrooms and their environments, contributing significantly to the understanding of the factors influencing mushroom toxicity.
 
 Our response variable is `class`, which is a qualitative variable labeled "e" for edible or "p" for poisonous.
 
 Key quantitative predictor variables include `stem.height` and `stem.width`, the height (cm) and width (cm) of the stem of the mushroom. We are also interested in `cap.diameter`, the diameter of the mushroom cap (cm).
 
-Key qualitative predictor variables include `cap.shape`, the shape of the mushroom cap; `gill.color`, the color of the fungi gills, `stem.color`, the color of the mushroom stem; `habitat`, the habitat that the mushroom is grown/found; and `season`, the season that the mushroom is grown/found. The possible categories these variables can be take can be found in our **data dictionary** [here](https://github.com/sta221-fa24/project-Tofu-FC/blob/main/data/README.md).
+Key qualitative predictor variables include `cap.shape`, the shape of the mushroom cap; `gill.color`, the color of the fungi gills, `stem.color`, the color of the mushroom stem; `habitat`, the habitat that the mushroom is grown/found; and `season`, the season that the mushroom is grown/found.
+
+The `cap.shape` codes are:
+
+| b    | c       | x      | f    | s      | p         | o      |
+|------|---------|--------|------|--------|-----------|--------|
+| bell | conical | convex | flat | sunken | spherical | others |
+
+The `gill.color` and `stem.color` are:
+
+| n     | b    | g    | r     | p    | u      | e   | w     | y      | l    | o      | k     | f    |
+|-------|-----|-----|------|-----|-------|-----|------|-------|-----|-------|------|------|
+| brown | buff | gray | green | pink | purple | red | white | yellow | blue | orange | black | none |
+
+The `habitat` codes are:
+
+| g       | l      | m       | p     | h      | u     | w     | d     |
+|---------|--------|---------|-------|--------|-------|-------|-------|
+| grasses | leaves | meadows | paths | heaths | urban | waste | woods |
 
 ## Exploratory Data Analysis
 
@@ -102,12 +118,45 @@ mushrooms |>
   select(cap.diameter, stem.height, stem.width) |>
   ggpairs()
 
+mushrooms |>
+  summarise(min = min(cap.diameter), 
+            q1 = quantile(cap.diameter, 0.25), 
+            median = median(cap.diameter),
+            q3 = quantile(cap.diameter, 0.75), 
+            max = max(cap.diameter),
+            mean = mean(cap.diameter),
+            sd = sd(cap.diameter)) |>
+  kable(digits = 3, 
+        caption = "cap diameter summary statistics")
+
+mushrooms |>
+  summarise(min = min(stem.height), 
+            q1 = quantile(stem.height, 0.25), 
+            median = median(stem.height),
+            q3 = quantile(stem.height, 0.75), 
+            max = max(stem.height),
+            mean = mean(stem.height),
+            sd = sd(stem.height)) |>
+  kable(digits = 3,
+        caption = "stem height summary statistics")
+
+mushrooms |>
+  summarise(min = min(stem.width), 
+            q1 = quantile(stem.width, 0.25), 
+            median = median(stem.width),
+            q3 = quantile(stem.width, 0.75), 
+            max = max(stem.width),
+            mean = mean(stem.width),
+            sd = sd(stem.width)) |>
+  kable(digits = 3,
+        caption = "stem width summary statistics")
+
 # final predictors <- c("cap.diameter", "cap.shape", "gill.color",
 #                 "stem.color", "habitat", "season")
 # response_var <- "class"
 ```
 
-We were first interested in seeing the relationship between our continuous, quantitative variables. While not totally linear, with correlations of $0.423$ and $0.436$, they graphs seem to be somewhat linear, with some redundancy in their information. Thus, for the rest of the EDA we will focus mainly on visualizing cap.diameter. We may consider adding them back for the final model, but were more interested in seeing some of the EDA with the categorical variables.
+We were first interested in seeing the relationship between our continuous, quantitative variables. While not totally linear, with correlations of $0.423$ and $0.436$, they graphs seem to be somewhat linear, with some redundancy in their information. Thus, for the rest of the EDA we will focus mainly on visualizing `cap.diameter`. We may consider adding them back for the final model, but were more interested in seeing some of the EDA with the categorical variables. The mean cap diameter is 6.734cm, with a SD of 5.265cm. The mean stem height is 6.582cm, with a SD of 3.37cm. The mean stem width is 12.149cm, with a SD of 10.036cm.
 
 ```{r}
 #| label: univariate predictors
@@ -139,7 +188,7 @@ p6 <- ggplot(mushrooms, aes(x = season)) +
 grid.arrange(p1,p2,p3,p4,p5,p6)
 ```
 
-To visualize the distribution of some of our predictor variables, we use a histogram for our continuous variable `cap.diameter` and bar graphs for our categorical variables. The distribution of cap diameter seems to be unimodal, skewed right. From the For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common; for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove); for stem color the most common is white, yellow, and brown; for habitat, woods is the most common; for season, autumn and summer tends to be the most common.
+To visualize the distribution of some of our predictor variables, we use a histogram for our continuous variable `cap.diameter` and bar graphs for our categorical variables. The distribution of cap diameter seems to be unimodal, skewed right. From the For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common; for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove); for stem color the most common is white, yellow, and brown; for habitat, woods is the most common (see above for code meanings); for season, autumn and summer tends to be the most common.
 
 ```{r}
 #| label: bivariate EDA
@@ -211,6 +260,6 @@ ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
   theme_minimal()
 ```
 
-Finally, we look at multivariate data analysis including 2 predictors and our response variable. While the distribution of stem width and stem height seemed to be the same as cap diameter, and there may be some potential multicolinearity, we are still interested in visualizing their effect on the edibility of the mushroom. Here, we visualize the effect of both stem width and stem height on the response variable, `class`. Interestingly, it seems like mushrooms with either high stem width or stem height seem to be edible.
+Finally, we look at multivariate data analysis including 2 predictors and our response variable. Here, we visualize the effect of both stem width and stem height on the response variable, `class`. Interestingly, it seems like mushrooms with either high stem width or stem height seem to be edible. This suggests there may be some potential interaction effects between stem height and stem width – the low value of one alone does not seem to predict if the mushroom is poisonous, but requires the low value of both.
 
 ## References
