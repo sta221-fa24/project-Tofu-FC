@@ -64,7 +64,7 @@ The `cap.shape` codes are:
 The `gill.color` and `stem.color` are:
 
 | n     | b    | g    | r     | p    | u      | e   | w     | y      | l    | o      | k     | f    |
-|-------|-----|-----|------|-----|-------|-----|------|-------|-----|-------|------|------|
+|-------|------|------|-------|------|--------|-----|-------|--------|------|--------|-------|------|
 | brown | buff | gray | green | pink | purple | red | white | yellow | blue | orange | black | none |
 
 The `habitat` codes are:
@@ -194,30 +194,42 @@ To visualize the distribution of some of our predictor variables, we use a histo
 #| label: bivariate EDA
 g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
     geom_boxplot() +
-    labs(title = "Response vs cap diameter")
+    theme(legend.title = element_blank()) +
+    labs(title = "Response vs cap diameter",
+         x = "Cap diameter")
 g2 <- ggplot(mushrooms, aes(x = cap.shape, fill = class)) +
     geom_bar(position = "dodge") +
-    labs(title = "Response vs cap shape")
+    theme(legend.title = element_blank()) +
+    labs(title = "Response vs cap shape",
+         x = "Cap shape")
 g3 <- ggplot(mushrooms, aes(x = gill.color, fill = class)) +
     geom_bar(position = "dodge") +
-    labs(title = "Response vs gill color")
+    theme(legend.title = element_blank()) +
+    labs(title = "Response vs gill color",
+         x = "Gill color")
 # g3 <- ggplot(mushrooms, aes(x = stem.root, fill = class)) +
 #     geom_bar(position = "dodge") +
 #     labs(title = "Response vs stem root")
 g4 <- ggplot(mushrooms, aes(x = stem.color, fill = class)) +
     geom_bar(position = "dodge") +
-    labs(title = "Response vs stem color")
+    theme(legend.title = element_blank()) +
+    labs(title = "Response vs stem color",
+         x ="Stem color")
 g5 <- ggplot(mushrooms, aes(x = habitat, fill = class)) +
     geom_bar(position = "dodge") +
-    labs(title = "Response vs habitat")
+    theme(legend.title = element_blank()) +
+    labs(title = "Response vs habitat",
+         x = "Habitat")
 g6 <- ggplot(mushrooms, aes(x = season, fill = class)) +
     geom_bar(position = "dodge") +
-    labs(title = "Response vs season")
+    theme(legend.title = element_blank()) +
+    labs(title = "Response vs season",
+         x = "Season")
 
 grid.arrange(g1,g2,g3,g4,g5,g6)
 ```
 
-The bivariate exploratory data analysis also shows some interesting findings for predictors. In particular, categories that have a disparity between the two different classes could offer potential modeling power in classification of the classes (toxicity). Larger, more extreme cap diameter is often linked to edibility. Cap shape of convex, bell, and others is more likely to be poisonous/toxic than edible. We also see that stem root of club and rooted tends to be poisonous, but there is relatively a low amount of observations. For stem color, yellow and brown tends to be more poisonous than not. And lastly the habitat of woods and the season of autumn and summer also observes a similar observation.
+The bivariate exploratory data analysis also shows some interesting findings for predictors. In particular, categories that have a disparity between the two different classes could offer potential modeling power in classification of the classes (toxicity). Larger, more extreme cap diameter is often linked to edibility. Cap shape of convex, bell, and others is more likely to be poisonous/toxic than edible. We also see that gill color of brown and yellow tends to be poisonous. For stem color, yellow and brown tends to be more poisonous than not. And lastly the habitat of woods and the season of autumn and summer also observes a similar observation.
 
 ```{r}
 #| label: analysis of interaction
@@ -240,11 +252,11 @@ ggplot(mushrooms, aes(x = cap.color, y = cap.shape, fill = class)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-We believe that these predictors may have potential interactive effects that could help us with our model to predict edibility of mushrooms.
+We believe that these predictors may have potential interactive effects that could help us with our model to predict edibility of mushrooms due to the fact that certain more specific characteristics tends to be poisonous.
 
-**Habitat × Season**: Mushrooms in certain habitats might only be edible during specific seasons.
+**Habitat × Season**: Our EDA reveals that mushrooms in certain habitats might only be edible during specific seasons.
 
-**Cap color × Cap shape**: Some combinations of cap color and shape may signal edibility more strongly than either feature alone.
+**Cap color × Cap shape**: Additionally, some combinations of cap color and shape may signal edibility more strongly than either feature alone.
 
 ```{r}
 #| label: multivariate EDA
