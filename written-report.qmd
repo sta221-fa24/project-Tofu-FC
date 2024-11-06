@@ -53,7 +53,7 @@ Our response variable is `class`, which is a qualitative variable labeled "e" fo
 
 Key quantitative predictor variables include `stem.height` and `stem.width`, the height (cm) and width (cm) of the stem of the mushroom. We are also interested in `cap.diameter`, the diameter of the mushroom cap (cm).
 
-Key qualitative predictor variables include `cap.shape`, the shape of the mushroom cap; `gill.color`, the color of the fungi gills, `stem.color`, the color of the mushroom stem; `habitat`, the habitat that the mushroom is grown/found; and `season`, the season that the mushroom is grown/found.
+Key qualitative predictor variables include `cap.shape`, the shape of the mushroom cap; `gill.color`, the color of the fungi gills, `stem.color`, the color of the mushroom stem; `habitat`, the habitat that the mushroom is grown/found; and `season`, the season that the mushroom is grown/found (spring=s, summer=u, autumn=a, winter=w).
 
 The `cap.shape` codes are:
 
@@ -64,7 +64,7 @@ The `cap.shape` codes are:
 The `gill.color` and `stem.color` are:
 
 | n     | b    | g    | r     | p    | u      | e   | w     | y      | l    | o      | k     | f    |
-|-------|------|------|-------|------|--------|-----|-------|--------|------|--------|-------|------|
+|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | brown | buff | gray | green | pink | purple | red | white | yellow | blue | orange | black | none |
 
 The `habitat` codes are:
@@ -243,20 +243,53 @@ ggplot(mushrooms, aes(x = habitat, fill = class)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(mushrooms, aes(x = cap.color, y = cap.shape, fill = class)) +
+
+
+
+mushroom_prop <- mushrooms |>
+  group_by(cap.color, cap.shape) |> 
+  summarize(edible_count = sum(class == "e"),
+            poisonous_count = sum(class == "p")) |>
+  mutate(proportion_e_to_p = edible_count / poisonous_count) |>
+  select(cap.color, cap.shape, proportion_e_to_p)
+mushroom_prop <- mushroom_prop |>
+  mutate(log_prop = log(proportion_e_to_p))
+
+caption_msg <- "'e' denotes always edible
+                'p' denotes always poisonous"
+
+
+ggplot(mushroom_prop, aes(x = cap.color, y = cap.shape, 
+                          fill = log_prop)) +
   geom_tile() +
   labs(title = "Cap Color and Shape Combinations by Edibility",
+       subtitle = 
+         "Using log ratios of edible to poisonous mushrooms",
        x = "Cap Color",
-       y = "Cap Shape") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+       y = "Cap Shape",
+       fill = "log(e/p)",
+       caption = caption_msg) +
+  geom_tile(data = mushroom_prop |>
+              filter(log_prop == -Inf),
+            aes(y = cap.shape, x = cap.color),
+            fill = "firebrick1") +
+  geom_tile(data = mushroom_prop |>
+              filter(log_prop == Inf),
+            aes(y = cap.shape, x = cap.color),
+            fill = "darkseagreen2") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  geom_text(aes(label = case_when(
+                          log_prop == Inf ~ "e",
+                          log_prop == -Inf ~ "p",
+                          TRUE ~ as.character(round(log_prop, 1)))),
+            color = "black")
 ```
 
 We believe that these predictors may have potential interactive effects that could help us with our model to predict edibility of mushrooms due to the fact that certain more specific characteristics tends to be poisonous.
 
-**Habitat × Season**: Our EDA reveals that mushrooms in certain habitats might only be edible during specific seasons.
+**Habitat × Season**: Our EDA reveals that mushrooms in certain habitats might only be edible during specific seasons. For example, mushrooms in the meadows are edible in the winter, but may be poisonous in other seasons.
 
-**Cap color × Cap shape**: Additionally, some combinations of cap color and shape may signal edibility more strongly than either feature alone.
+**Cap color × Cap shape**: Certain combinations of cap color and cap shape are always edible or poisonous. Additionally, the log ratios across combinations of cap colors and cap sizes are varied with no pattern – for a mushroom with a sunken cap shape, it could be always edible (if the color is buff) to always poisonous (if the color is red). Similarly, if a mushroom is brown, it could be high likely it is edible (if the cap shape is conical) or likely it is poisonous (if the cap shape is bell).
 
 ```{r}
 #| label: multivariate EDA
