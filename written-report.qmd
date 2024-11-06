@@ -23,6 +23,11 @@ library(gridExtra)
 # add other packages as needed
 
 mushrooms <- read.csv2("data/mushrooms_dataset.csv")
+
+# Make Quantitative data numerical
+mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
+mushrooms$stem.height <- as.numeric(mushrooms$stem.height)
+mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
 ```
 
 ## Introduction
@@ -84,10 +89,10 @@ The `habitat` codes are:
 ```
 
 ```{r}
-#| label: univariate response variable
+#| label: univariate response variable, summary statistics
 
 # EDA Response (Categorical) Variable
-ggplot(mushrooms, aes(x = class)) +
+ggplot(mushrooms, aes(x = class, fill = class)) +
   geom_bar() +
   labs(
     title = "Distribution of Edibility/Classes of Mushrooms",
@@ -107,12 +112,7 @@ mushrooms |>
 Looking at the overall distribution of our response variable `class`, most of the mushrooms in our dataset seem to be poisonous ("p"). 33888 of the observations, or 55.5% of them are labeled poisonous, as opposed to 27181 (44.5%) of them as edible.
 
 ```{r}
-#| label: data manipulation, multicolinearity
-
-# Make Quantitative data numerical
-mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
-mushrooms$stem.height <- as.numeric(mushrooms$stem.height)
-mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
+#| label: multicolinearity
 
 mushrooms |>
   select(cap.diameter, stem.height, stem.width) |>
@@ -164,27 +164,33 @@ We were first interested in seeing the relationship between our continuous, quan
 p1 <- ggplot(mushrooms, aes(x = cap.diameter)) +
     geom_histogram() +
     labs(title = "Cap diameter",
-         x="Cap diameter")
+         x="Cap diameter") +
+  theme_minimal()
 p2 <- ggplot(mushrooms, aes(x = cap.shape)) +
     geom_bar() +
     labs(title = "Cap shape",
-         x="Cap shape")
+         x="Cap shape") +
+  theme_minimal()
 p3 <- ggplot(mushrooms, aes(x = gill.color)) +
     geom_bar() +
     labs(title = "Gill color",
-         x="Gill color")
+         x="Gill color") +
+  theme_minimal()
 p4 <- ggplot(mushrooms, aes(x = stem.color)) +
     geom_bar() +
     labs(title = "Stem color",
-         x="Stem color")
+         x="Stem color") +
+  theme_minimal()
 p5 <- ggplot(mushrooms, aes(x = habitat)) +
     geom_bar() +
     labs(title = "Habitat",
-         x="Habitat")
+         x="Habitat") +
+  theme_minimal()
 p6 <- ggplot(mushrooms, aes(x = season)) +
     geom_bar() +
     labs(title = "Season",
-         x="Season")
+         x="Season") +
+  theme_minimal()
 grid.arrange(p1,p2,p3,p4,p5,p6)
 ```
 

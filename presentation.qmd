@@ -1,0 +1,184 @@
+---
+title: "Mushrooms"
+author: "Tofu FC"
+date: "2024-11-11"
+date-format: "MMM DD, YYYY"
+format: 
+  revealjs:
+    theme: slides.scss
+    multiplex: false
+    transition: fade
+    slide-number: true
+    incremental: false 
+    chalkboard: true
+html-math-method:
+  method: mathjax
+  url: "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+execute:
+  freeze: auto
+  warning: false
+  message: false
+  echo: false
+knitr:
+  opts_chunk: 
+    R.options:      
+    width: 200
+bibliography: references.bib
+---
+
+```{r}
+#| label: load packages and data
+
+library(tidyverse)
+library(tidymodels)
+library(dbplyr)
+library(knitr)
+library(GGally)
+library(gridExtra)
+# add other packages as needed
+
+mushrooms <- read.csv2("data/mushrooms_dataset.csv")
+
+# Make Quantitative data numerical
+mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
+mushrooms$stem.height <- as.numeric(mushrooms$stem.height)
+mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
+```
+
+## Background
+
+#### Motivation
+::: {.incremental}
+-   Mushrooms important to the ecosystem, serve as food source
+
+-   But mushrooms can be potentially poisonous
+
+    -   1999 to 2016, 133,700 reported cases
+
+    -   704 instances of major harm and 52 fatalities
+
+-   Can help reduce accidents by classifying poisonous mushrooms!
+:::
+#### Research Question
+
+What environmental factors and/or physical features of mushrooms indicate that a wild mushroom is poisonous?
+
+## Data
+
+## EDA
+::: {.panel-tabset}
+
+### Response Variable
+```{r}
+#EDA Response (Categorical) Variable
+ggplot(mushrooms, aes(x = class, fill = class)) +
+  geom_bar() +
+  theme_minimal() +
+  labs(
+    title = "Distribution of Edibility/Classes of Mushrooms",
+    x = "Class",
+    caption = "44.5% are edible, 55.5% are poisonous"
+  ) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+```
+
+### Univariate predictors
+```{r}
+#| label: univariate predictors
+
+p1 <- ggplot(mushrooms, aes(x = cap.diameter)) +
+    geom_histogram() +
+    theme_minimal() +
+    labs(title = "Cap diameter",
+         x="Cap diameter")
+p2 <- ggplot(mushrooms, aes(x = cap.shape)) +
+    geom_bar() +
+    theme_minimal() +
+    labs(title = "Cap shape",
+         x="Cap shape")
+p3 <- ggplot(mushrooms, aes(x = gill.color)) +
+    geom_bar() +
+    theme_minimal() +
+    labs(title = "Gill color",
+         x="Gill color")
+p4 <- ggplot(mushrooms, aes(x = stem.color)) +
+    geom_bar() +
+    theme_minimal() +
+    labs(title = "Stem color",
+         x="Stem color")
+p5 <- ggplot(mushrooms, aes(x = habitat)) +
+    geom_bar() +
+    theme_minimal() +
+    labs(title = "Habitat",
+         x="Habitat")
+p6 <- ggplot(mushrooms, aes(x = season)) +
+    geom_bar() +
+    theme_minimal() +
+    labs(title = "Season",
+         x="Season")
+grid.arrange(p1,p2,p3,p4,p5,p6)
+```
+:::
+
+
+## EDA (cont.)
+::: {.panel-tabset}
+
+### Habitat and Season
+```{r}
+ggplot(mushrooms, aes(x = habitat, fill = class)) +
+  geom_bar(position = "fill") + 
+  facet_wrap(~ season) +
+  labs(title = "Edibility Distribution by Habitat and Season",
+       x = "Habitat",
+       y = "Proportion of Edibility") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+### Cap Color and Size
+```{r}
+mushroom_prop <- mushrooms |>
+  group_by(cap.color, cap.shape) |> 
+  summarize(edible_count = sum(class == "e"),
+            poisonous_count = sum(class == "p")) |>
+  mutate(proportion_e_to_p = edible_count / poisonous_count) |>
+  select(cap.color, cap.shape, proportion_e_to_p)
+mushroom_prop <- mushroom_prop |>
+  mutate(log_prop = log(proportion_e_to_p))
+
+caption_msg <- "'e' denotes always edible
+                'p' denotes always poisonous"
+
+
+ggplot(mushroom_prop, aes(x = cap.color, y = cap.shape, 
+                          fill = log_prop)) +
+  geom_tile() +
+  labs(title = "Cap Color and Shape Combinations by Edibility",
+       subtitle = 
+         "Using log ratios of edible to poisonous mushrooms",
+       x = "Cap Color",
+       y = "Cap Shape",
+       fill = "log(e/p)",
+       caption = caption_msg) +
+  geom_tile(data = mushroom_prop |>
+              filter(log_prop == -Inf),
+            aes(y = cap.shape, x = cap.color),
+            fill = "firebrick1") +
+  geom_tile(data = mushroom_prop |>
+              filter(log_prop == Inf),
+            aes(y = cap.shape, x = cap.color),
+            fill = "darkseagreen2") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  geom_text(aes(label = case_when(
+                          log_prop == Inf ~ "e",
+                          log_prop == -Inf ~ "p",
+                          TRUE ~ as.character(round(log_prop, 1)))),
+            color = "black")
+```
+:::
+
+## Initial modeling
+
+## Next steps + questions
