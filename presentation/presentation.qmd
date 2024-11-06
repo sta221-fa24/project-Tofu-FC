@@ -37,7 +37,7 @@ library(GGally)
 library(gridExtra)
 # add other packages as needed
 
-mushrooms <- read.csv2("data/mushrooms_dataset.csv")
+mushrooms <- read.csv2("../data/mushrooms_dataset.csv")
 
 # Make Quantitative data numerical
 mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
@@ -47,8 +47,7 @@ mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
 
 ## Background
 
-#### Motivation
-::: {.incremental}
+::: incremental
 -   Mushrooms important to the ecosystem, serve as food source
 
 -   But mushrooms can be potentially poisonous
@@ -58,17 +57,19 @@ mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
     -   704 instances of major harm and 52 fatalities
 
 -   Can help reduce accidents by classifying poisonous mushrooms!
-:::
-#### Research Question
 
-What environmental factors and/or physical features of mushrooms indicate that a wild mushroom is poisonous?
+-   What environmental factors and/or physical features of mushrooms indicate that a wild mushroom is poisonous?
+:::
+
+#### 
 
 ## Data
 
 ## EDA
-::: {.panel-tabset}
 
+::: panel-tabset
 ### Response Variable
+
 ```{r}
 #EDA Response (Categorical) Variable
 ggplot(mushrooms, aes(x = class, fill = class)) +
@@ -83,6 +84,7 @@ ggplot(mushrooms, aes(x = class, fill = class)) +
 ```
 
 ### Univariate predictors
+
 ```{r}
 #| label: univariate predictors
 
@@ -120,24 +122,25 @@ grid.arrange(p1,p2,p3,p4,p5,p6)
 ```
 :::
 
-
 ## EDA (cont.)
-::: {.panel-tabset}
 
+::: panel-tabset
 ### Habitat and Season
+
 ```{r}
 ggplot(mushrooms, aes(x = habitat, fill = class)) +
   geom_bar(position = "fill") + 
   facet_wrap(~ season) +
   labs(title = "Edibility Distribution by Habitat and Season",
        x = "Habitat",
-       y = "Proportion of Edibility") +
+       y = "Proportion of Edibility",
+       caption = "Habitat codes: grasses=g, leaves=l, meadows=m, paths=p, heaths=h, urban=u, waste=w, woods=d") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-
 ### Cap Color and Size
+
 ```{r}
 mushroom_prop <- mushrooms |>
   group_by(cap.color, cap.shape) |> 
@@ -149,7 +152,9 @@ mushroom_prop <- mushroom_prop |>
   mutate(log_prop = log(proportion_e_to_p))
 
 caption_msg <- "'e' denotes always edible
-                'p' denotes always poisonous"
+                'p' denotes always poisonous
+                Cap shape codes: bell=b, conical=c, convex=x, flat=f, sunken=s, spherical=p, others=o
+                Cap color codes: brown=n, buff=b, gray=g, green=r, pink=p, purple=u, red=e, white=w, yellow=y, blue=l, orange=o, black=k"
 
 
 ggplot(mushroom_prop, aes(x = cap.color, y = cap.shape, 

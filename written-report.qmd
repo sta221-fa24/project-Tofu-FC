@@ -69,7 +69,7 @@ The `cap.shape` codes are:
 The `gill.color` and `stem.color` are:
 
 | n     | b    | g    | r     | p    | u      | e   | w     | y      | l    | o      | k     | f    |
-|------|------|------|------|------|------|------|------|------|------|------|------|------|
+|-------|------|------|-------|------|--------|-----|-------|--------|------|--------|-------|------|
 | brown | buff | gray | green | pink | purple | red | white | yellow | blue | orange | black | none |
 
 The `habitat` codes are:
