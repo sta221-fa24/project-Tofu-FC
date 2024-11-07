@@ -1,6 +1,6 @@
 ---
-title: "Mushrooms"
-author: "Tofu FC"
+title: "Mushroom Edibility Analysis"
+author: "Tofu FC: Huiwen Wang, Rocky Zhang, Darrick Zhang"
 date: "2024-11-11"
 date-format: "MMM DD, YYYY"
 format: 
@@ -65,10 +65,17 @@ mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
 
 ## Data
 
+::: incremental
+-   Curated on April 26, 1987, and submitted to the UCI by the National Audubon Society Field Guide.
+-   The National Audubon Society conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms.
+-   Their research incorporate a wide range of physical characteristics, including size, shape, color, and texture of the mushrooms.
+-   Additionally, they documented environmental factors such as the type of habitat and seasonal variations along with the toxicity of the mushrooms.
+:::
+
 ## EDA
 
 ::: panel-tabset
-### Response Variable
+### Response Var.
 
 ```{r}
 #EDA Response (Categorical) Variable
@@ -119,6 +126,48 @@ p6 <- ggplot(mushrooms, aes(x = season)) +
     labs(title = "Season",
          x="Season")
 grid.arrange(p1,p2,p3,p4,p5,p6)
+```
+
+### Bivariate predictors
+
+```{r}
+#| label: bivariate EDA
+
+g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
+    geom_boxplot() +
+    theme(legend.title = element_blank()) +
+    labs(title = "Response vs cap diameter",
+         x = "Cap diameter")
+g2 <- ggplot(mushrooms, aes(x = cap.shape, fill = class)) +
+    geom_bar(position = "dodge") +
+    theme(legend.title = element_blank()) +
+    labs(title = "Response vs cap shape",
+         x = "Cap shape")
+g3 <- ggplot(mushrooms, aes(x = gill.color, fill = class)) +
+    geom_bar(position = "dodge") +
+    theme(legend.title = element_blank()) +
+    labs(title = "Response vs gill color",
+         x = "Gill color")
+# g3 <- ggplot(mushrooms, aes(x = stem.root, fill = class)) +
+#     geom_bar(position = "dodge") +
+#     labs(title = "Response vs stem root")
+g4 <- ggplot(mushrooms, aes(x = stem.color, fill = class)) +
+    geom_bar(position = "dodge") +
+    theme(legend.title = element_blank()) +
+    labs(title = "Response vs stem color",
+         x ="Stem color")
+g5 <- ggplot(mushrooms, aes(x = habitat, fill = class)) +
+    geom_bar(position = "dodge") +
+    theme(legend.title = element_blank()) +
+    labs(title = "Response vs habitat",
+         x = "Habitat")
+g6 <- ggplot(mushrooms, aes(x = season, fill = class)) +
+    geom_bar(position = "dodge") +
+    theme(legend.title = element_blank()) +
+    labs(title = "Response vs season",
+         x = "Season")
+
+grid.arrange(g1,g2,g3,g4,g5,g6)
 ```
 :::
 
