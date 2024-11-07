@@ -440,9 +440,116 @@ Tofu FC: Huiwen Wang, Rocky Zhang, Darrick Zhang
 </section>
 <section id="initial-modeling" class="slide level2">
 <h2>Initial modeling</h2>
+<div class="panel-tabset">
+<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">Simple Model</a></li><li><a href="#tabset-3-2">Tidy Output</a></li><li><a href="#tabset-3-3">Confusion Matrix</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1">
+<p><span class="math display">\[
+\text{logit}(Odds(\text{class} = p)) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season}
+\]</span></p>
+</div>
+<div id="tabset-3-2">
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">term</th>
+<th style="text-align: right;">estimate</th>
+<th style="text-align: right;">std.error</th>
+<th style="text-align: right;">statistic</th>
+<th style="text-align: right;">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">0.856</td>
+<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">39.927</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">cap.diameter</td>
+<td style="text-align: right;">-0.083</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">-34.223</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">seasons</td>
+<td style="text-align: right;">-0.599</td>
+<td style="text-align: right;">0.050</td>
+<td style="text-align: right;">-11.951</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">seasonu</td>
+<td style="text-align: right;">0.013</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.610</td>
+<td style="text-align: right;">0.542</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">seasonw</td>
+<td style="text-align: right;">-0.699</td>
+<td style="text-align: right;">0.037</td>
+<td style="text-align: right;">-18.820</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="tabset-3-3">
+<p>class binary: edible = 0, poisonous = 1</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction    0    1
+         0 2639 1757
+         1 5515 8409
+                                          
+               Accuracy : 0.6031          
+                 95% CI : (0.5959, 0.6102)
+    No Information Rate : 0.5549          
+    P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+                                          
+                  Kappa : 0.158           
+                                          
+ Mcnemar's Test P-Value : &lt; 2.2e-16       
+                                          
+            Sensitivity : 0.3236          
+            Specificity : 0.8272          
+         Pos Pred Value : 0.6003          
+         Neg Pred Value : 0.6039          
+             Prevalence : 0.4451          
+         Detection Rate : 0.1441          
+   Detection Prevalence : 0.2400          
+      Balanced Accuracy : 0.5754          
+                                          
+       'Positive' Class : 0               
+                                          </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 </section>
 <section id="next-steps-questions" class="slide level2">
 <h2>Next steps + questions</h2>
+<div>
+<ul>
+<li class="fragment">Determine the need of interaction terms</li>
+<li class="fragment">Test more specified models</li>
+<li class="fragment">Evaluate an efficient parsimonious model</li>
+<li class="fragment">Optimize on p cutoff</li>
+<li class="fragment">Sensitivity vs.&nbsp;specificity</li>
+</ul>
+</div>
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
