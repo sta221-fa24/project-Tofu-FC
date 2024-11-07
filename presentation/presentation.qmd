@@ -50,7 +50,7 @@ mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
 ## Background
 
 ::: incremental
--   Mushrooms important to the ecosystem, serve as food source
+-   Mushrooms are important to the ecosystem, often serve as a food source among different populations
 
 -   But mushrooms can be potentially poisonous
 
@@ -68,7 +68,7 @@ mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
 ## Data
 
 ::: incremental
--   Curated on April 26, 1987, and submitted to the UCI by the National Audubon Society Field Guide.
+-   The Dataset is curated on April 26, 1987, and submitted to the UCI by the National Audubon Society Field Guide.
 -   The National Audubon Society conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms.
 -   Their research incorporate a wide range of physical characteristics, including size, shape, color, and texture of the mushrooms.
 -   Additionally, they documented environmental factors such as the type of habitat and seasonal variations along with the toxicity of the mushrooms.
