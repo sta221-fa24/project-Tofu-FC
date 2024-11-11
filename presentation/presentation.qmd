@@ -77,7 +77,7 @@ mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
 ## EDA
 
 ::: panel-tabset
-### Response Var.
+### Response
 
 ```{r}
 #EDA Response (Categorical) Variable
@@ -92,7 +92,7 @@ ggplot(mushrooms, aes(x = class, fill = class)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5)
 ```
 
-### Univariate predictors
+### Univariate
 
 ```{r}
 #| label: univariate predictors
@@ -130,7 +130,7 @@ p6 <- ggplot(mushrooms, aes(x = season)) +
 grid.arrange(p1,p2,p3,p4,p5,p6)
 ```
 
-### Bivariate predictors
+### Bivariate
 
 ```{r}
 #| label: bivariate EDA
@@ -190,7 +190,7 @@ ggplot(mushrooms, aes(x = habitat, fill = class)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-### Cap Color and Size
+### Cap Color and Cap Shape
 
 ```{r}
 mushroom_prop <- mushrooms |>
