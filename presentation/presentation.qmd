@@ -37,6 +37,7 @@ library(GGally)
 library(gridExtra)
 library(caTools) # might need to install
 library(caret) # might need to install
+library(grid)
 # add other packages as needed
 
 mushrooms <- read.csv2("../data/mushrooms_dataset.csv")
@@ -50,7 +51,7 @@ mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
 ## Background
 
 ::: incremental
--   Mushrooms important to the ecosystem, serve as food source
+-   Mushrooms are important to the ecosystem, often serve as a food source among different populations
 
 -   But mushrooms can be potentially poisonous
 
@@ -68,7 +69,7 @@ mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
 ## Data
 
 ::: incremental
--   Curated on April 26, 1987, and submitted to the UCI by the National Audubon Society Field Guide.
+-   The Dataset is curated on April 26, 1987, and submitted to the UCI by the National Audubon Society Field Guide.
 -   The National Audubon Society conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms.
 -   Their research incorporate a wide range of physical characteristics, including size, shape, color, and texture of the mushrooms.
 -   Additionally, they documented environmental factors such as the type of habitat and seasonal variations along with the toxicity of the mushrooms.
@@ -92,6 +93,7 @@ ggplot(mushrooms, aes(x = class, fill = class)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5)
 ```
 
+
 ### Univariate
 
 ```{r}
@@ -99,9 +101,11 @@ ggplot(mushrooms, aes(x = class, fill = class)) +
 
 p1 <- ggplot(mushrooms, aes(x = cap.diameter)) +
     geom_histogram() +
+  geom_vline(xintercept=mean(mushrooms$cap.diameter), color="red") +
     theme_minimal() +
     labs(title = "Cap diameter",
-         x="Cap diameter")
+         x="Cap diameter",
+         caption = "mean: 6.734; SD: 5.265")
 p2 <- ggplot(mushrooms, aes(x = cap.shape)) +
     geom_bar() +
     theme_minimal() +
@@ -127,7 +131,12 @@ p6 <- ggplot(mushrooms, aes(x = season)) +
     theme_minimal() +
     labs(title = "Season",
          x="Season")
-grid.arrange(p1,p2,p3,p4,p5,p6)
+grid.arrange(p1,p2,p3,p4,p5,p6,
+              bottom = textGrob("cap shape: bell=b, conical=c, convex=x, flat=f, sunken=s, spherical=p, others=o
+colors: brown=n, buff=b, gray=g, green=r, pink=p, purple=u, red=e, white=w, yellow=y, blue=l, orange=o, black=k
+habitat: grasses=g, leaves=l, meadows=m, paths=p, heaths=h, urban=u, waste=w, woods=d
+season: spring=s, summer=u, autumn=a, winter=w", 
+                                                 gp = gpar(fontsize = 8)))
 ```
 
 ### Bivariate
@@ -169,14 +178,18 @@ g6 <- ggplot(mushrooms, aes(x = season, fill = class)) +
     labs(title = "Response vs season",
          x = "Season")
 
-grid.arrange(g1,g2,g3,g4,g5,g6)
+grid.arrange(g1,g2,g3,g4,g5,g6,bottom = textGrob("cap shape: bell=b, conical=c, convex=x, flat=f, sunken=s, spherical=p, others=o
+colors: brown=n, buff=b, gray=g, green=r, pink=p, purple=u, red=e, white=w, yellow=y, blue=l, orange=o, black=k
+habitat: grasses=g, leaves=l, meadows=m, paths=p, heaths=h, urban=u, waste=w, woods=d
+season: spring=s, summer=u, autumn=a, winter=w",
+                                                 gp = gpar(fontsize = 8)))
 ```
 :::
 
 ## EDA (cont.)
 
 ::: panel-tabset
-### Habitat and Season
+### Habitat & Season
 
 ```{r}
 ggplot(mushrooms, aes(x = habitat, fill = class)) +
@@ -185,12 +198,13 @@ ggplot(mushrooms, aes(x = habitat, fill = class)) +
   labs(title = "Edibility Distribution by Habitat and Season",
        x = "Habitat",
        y = "Proportion of Edibility",
-       caption = "Habitat codes: grasses=g, leaves=l, meadows=m, paths=p, heaths=h, urban=u, waste=w, woods=d") +
+       caption = "Habitat codes: grasses=g, leaves=l, meadows=m, paths=p, heaths=h, urban=u, waste=w, woods=d
+       Season codes: spring=s, summer=u, autumn=a, winter=w") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-### Cap Color and Cap Shape
+### Cap Color & Shape
 
 ```{r}
 mushroom_prop <- mushrooms |>
@@ -232,6 +246,19 @@ ggplot(mushroom_prop, aes(x = cap.color, y = cap.shape,
                           log_prop == -Inf ~ "p",
                           TRUE ~ as.character(round(log_prop, 1)))),
             color = "black")
+```
+### Height & Width
+```{r}
+#| label: multivariate EDA
+ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
+  geom_point() +
+  labs(
+    title = "Distribution of Stem Height vs. Stem Width Among Different Edibility Classes",
+    y = "Stem Height (cm)",
+    x = "Stem Width (cm)",
+    color = "Class (Edibile or Not)"
+  ) +
+  theme_minimal()
 ```
 :::
 
@@ -279,6 +306,7 @@ confusionMatrix(as.factor(predicted_classes), as.factor(test_data$class_binary))
 :::
 
 ## Next steps + questions
+
 ::: incremental
 -   Determine the need of interaction terms
 -   Test more specified models
