@@ -20,6 +20,9 @@ library(dbplyr)
 library(knitr)
 library(GGally)
 library(gridExtra)
+library(caTools) # might need to install
+library(caret) # might need to install
+library(grid)
 # add other packages as needed
 
 mushrooms <- read.csv2("data/mushrooms_dataset.csv")
@@ -69,7 +72,7 @@ The `cap.shape` codes are:
 The `gill.color` and `stem.color` are:
 
 | n     | b    | g    | r     | p    | u      | e   | w     | y      | l    | o      | k     | f    |
-|-------|------|------|-------|------|--------|-----|-------|--------|------|--------|-------|------|
+|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | brown | buff | gray | green | pink | purple | red | white | yellow | blue | orange | black | none |
 
 The `habitat` codes are:
@@ -91,22 +94,24 @@ The `habitat` codes are:
 ```{r}
 #| label: univariate response variable, summary statistics
 
-# EDA Response (Categorical) Variable
+#EDA Response (Categorical) Variable
 ggplot(mushrooms, aes(x = class, fill = class)) +
   geom_bar() +
+  theme_minimal() +
   labs(
     title = "Distribution of Edibility/Classes of Mushrooms",
-    x = "Class"
+    x = "Class",
+    caption = "44.5% are edible, 55.5% are poisonous"
   ) +
-  theme_minimal()
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5)
 
 # Summary Statistics
-mushrooms |>
-  group_by(class) |>
-  summarise(
-    count = n(),
-    percentage = (count / nrow(mushrooms)) * 100
-  ) |> kable(digits=3)
+# mushrooms |>
+#  group_by(class) |>
+#  summarise(
+#    count = n(),
+#    percentage = (count / nrow(mushrooms)) * 100
+#  ) |> kable(digits=3)
 ```
 
 Looking at the overall distribution of our response variable `class`, most of the mushrooms in our dataset seem to be poisonous ("p"). 33888 of the observations, or 55.5% of them are labeled poisonous, as opposed to 27181 (44.5%) of them as edible.
@@ -163,35 +168,42 @@ We were first interested in seeing the relationship between our continuous, quan
 
 p1 <- ggplot(mushrooms, aes(x = cap.diameter)) +
     geom_histogram() +
+  geom_vline(xintercept=mean(mushrooms$cap.diameter), color="red") +
+    theme_minimal() +
     labs(title = "Cap diameter",
-         x="Cap diameter") +
-  theme_minimal()
+         x="Cap diameter",
+         caption = "mean: 6.734; SD: 5.265")
 p2 <- ggplot(mushrooms, aes(x = cap.shape)) +
     geom_bar() +
+    theme_minimal() +
     labs(title = "Cap shape",
-         x="Cap shape") +
-  theme_minimal()
+         x="Cap shape")
 p3 <- ggplot(mushrooms, aes(x = gill.color)) +
     geom_bar() +
+    theme_minimal() +
     labs(title = "Gill color",
-         x="Gill color") +
-  theme_minimal()
+         x="Gill color")
 p4 <- ggplot(mushrooms, aes(x = stem.color)) +
     geom_bar() +
+    theme_minimal() +
     labs(title = "Stem color",
-         x="Stem color") +
-  theme_minimal()
+         x="Stem color")
 p5 <- ggplot(mushrooms, aes(x = habitat)) +
     geom_bar() +
+    theme_minimal() +
     labs(title = "Habitat",
-         x="Habitat") +
-  theme_minimal()
+         x="Habitat")
 p6 <- ggplot(mushrooms, aes(x = season)) +
     geom_bar() +
+    theme_minimal() +
     labs(title = "Season",
-         x="Season") +
-  theme_minimal()
-grid.arrange(p1,p2,p3,p4,p5,p6)
+         x="Season")
+grid.arrange(p1,p2,p3,p4,p5,p6,
+              bottom = textGrob("cap shape: bell=b, conical=c, convex=x, flat=f, sunken=s, spherical=p, others=o
+colors: brown=n, buff=b, gray=g, green=r, pink=p, purple=u, red=e, white=w, yellow=y, blue=l, orange=o, black=k
+habitat: grasses=g, leaves=l, meadows=m, paths=p, heaths=h, urban=u, waste=w, woods=d
+season: spring=s, summer=u, autumn=a, winter=w", 
+                                                 gp = gpar(fontsize = 8)))
 ```
 
 To visualize the distribution of some of our predictor variables, we use a histogram for our continuous variable `cap.diameter` and bar graphs for our categorical variables. The distribution of cap diameter seems to be unimodal, skewed right. From the For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common; for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove); for stem color the most common is white, yellow, and brown; for habitat, woods is the most common (see above for code meanings); for season, autumn and summer tends to be the most common.
@@ -232,7 +244,11 @@ g6 <- ggplot(mushrooms, aes(x = season, fill = class)) +
     labs(title = "Response vs season",
          x = "Season")
 
-grid.arrange(g1,g2,g3,g4,g5,g6)
+grid.arrange(g1,g2,g3,g4,g5,g6,bottom = textGrob("cap shape: bell=b, conical=c, convex=x, flat=f, sunken=s, spherical=p, others=o
+colors: brown=n, buff=b, gray=g, green=r, pink=p, purple=u, red=e, white=w, yellow=y, blue=l, orange=o, black=k
+habitat: grasses=g, leaves=l, meadows=m, paths=p, heaths=h, urban=u, waste=w, woods=d
+season: spring=s, summer=u, autumn=a, winter=w",
+                                                 gp = gpar(fontsize = 8)))
 ```
 
 The bivariate exploratory data analysis also shows some interesting findings for predictors. In particular, categories that have a disparity between the two different classes could offer potential modeling power in classification of the classes (toxicity). Larger, more extreme cap diameter is often linked to edibility. Cap shape of convex, bell, and others is more likely to be poisonous/toxic than edible. We also see that gill color of brown and yellow tends to be poisonous. For stem color, yellow and brown tends to be more poisonous than not. And lastly the habitat of woods and the season of autumn and summer also observes a similar observation.
@@ -245,12 +261,11 @@ ggplot(mushrooms, aes(x = habitat, fill = class)) +
   facet_wrap(~ season) +
   labs(title = "Edibility Distribution by Habitat and Season",
        x = "Habitat",
-       y = "Proportion of Edibility") +
+       y = "Proportion of Edibility",
+       caption = "Habitat codes: grasses=g, leaves=l, meadows=m, paths=p, heaths=h, urban=u, waste=w, woods=d
+       Season codes: spring=s, summer=u, autumn=a, winter=w") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
-
 
 mushroom_prop <- mushrooms |>
   group_by(cap.color, cap.shape) |> 
@@ -262,7 +277,9 @@ mushroom_prop <- mushroom_prop |>
   mutate(log_prop = log(proportion_e_to_p))
 
 caption_msg <- "'e' denotes always edible
-                'p' denotes always poisonous"
+                'p' denotes always poisonous
+                Cap shape codes: bell=b, conical=c, convex=x, flat=f, sunken=s, spherical=p, others=o
+                Cap color codes: brown=n, buff=b, gray=g, green=r, pink=p, purple=u, red=e, white=w, yellow=y, blue=l, orange=o, black=k"
 
 
 ggplot(mushroom_prop, aes(x = cap.color, y = cap.shape, 
@@ -302,8 +319,7 @@ We believe that these predictors may have potential interactive effects that cou
 ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
   geom_point() +
   labs(
-    title = "Distribution of Stem Height vs. Stem Width Among
-    Different Edibility Classes",
+    title = "Distribution of Stem Height vs. Stem Width Among Different Edibility Classes",
     y = "Stem Height (cm)",
     x = "Stem Width (cm)",
     color = "Class (Edibile or Not)"
@@ -312,5 +328,58 @@ ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
 ```
 
 Finally, we look at multivariate data analysis including 2 predictors and our response variable. Here, we visualize the effect of both stem width and stem height on the response variable, `class`. Interestingly, it seems like mushrooms with either high stem width or stem height seem to be edible. This suggests there may be some potential interaction effects between stem height and stem width – the low value of one alone does not seem to predict if the mushroom is poisonous, but requires the low value of both.
+
+## Initial modeling
+
+::: panel-tabset
+### Simple Model
+
+$$
+\text{logit}(Odds(\text{class} = p)) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season}
+$$
+
+### Tidy Output
+
+```{r}
+# Convert the response variable to binary (e = 0, p = 1)
+mushrooms <- mushrooms |>
+  mutate(
+    class_binary = ifelse(mushrooms$class == "e", 0, 1)
+  )
+
+set.seed(123)  # for reproducibility
+split <- sample.split(mushrooms$class_binary, SplitRatio = 0.7)
+train_data <- subset(mushrooms, split == TRUE)
+test_data <- subset(mushrooms, split == FALSE)
+
+model <- glm(class_binary ~ cap.diameter + season, data = train_data, family = binomial)
+
+tidy(model) |>
+  kable(digits = 3)
+```
+
+### Confusion Matrix
+
+class binary: edible = 0, poisonous = 1
+
+```{r}
+# Make predictions
+predicted_probs <- predict(model, test_data, type = "response")
+predicted_classes <- ifelse(predicted_probs > 0.5, 1, 0) # cutoff is p = 0.5
+
+# Evaluate model
+confusionMatrix(as.factor(predicted_classes), as.factor(test_data$class_binary))
+```
+:::
+
+## Next steps + questions
+
+::: incremental
+-   Determine the need of interaction terms
+-   Test more specified models
+-   Evaluate an efficient parsimonious model
+-   Optimize on p cutoff
+-   Sensitivity vs. specificity
+:::
 
 ## References
