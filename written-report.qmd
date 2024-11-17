@@ -31,6 +31,12 @@ mushrooms <- read.csv2("data/mushrooms_dataset.csv")
 mushrooms$cap.diameter <- as.numeric(mushrooms$cap.diameter)
 mushrooms$stem.height <- as.numeric(mushrooms$stem.height)
 mushrooms$stem.width <- as.numeric(mushrooms$stem.width)
+
+# Convert the response variable to binary (e = 0, p = 1)
+mushrooms <- mushrooms |>
+  mutate(
+    class_binary = ifelse(mushrooms$class == "e", 0, 1)
+  )
 ```
 
 ## Introduction
@@ -329,6 +335,42 @@ ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
 
 Finally, we look at multivariate data analysis including 2 predictors and our response variable. Here, we visualize the effect of both stem width and stem height on the response variable, `class`. Interestingly, it seems like mushrooms with either high stem width or stem height seem to be edible. This suggests there may be some potential interaction effects between stem height and stem width – the low value of one alone does not seem to predict if the mushroom is poisonous, but requires the low value of both.
 
+```{r}
+#| label: Overall Significance F Test (Likelihood Ratio Test)
+null_model <- glm(class_binary ~ 1, data = mushrooms, family = "binomial")
+main_model <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
+                    gill.color + stem.color + habitat, 
+                    data = mushrooms, family = "binomial")
+(L_0 <- glance(null_model)$logLik)
+(L_a <- glance(main_model)$logLik)
+(G <- -2 * (L_0 - L_a)) #LRT test statistic
+(p_value <- pchisq(G, df = 3, lower.tail = FALSE))
+```
+
+The p-value is small, so we reject the $H_0$. The data provide evidence of at least one non-zero model coefficient in the model.
+
+```{r}
+#| label: Drop-in-deviance Test
+full_model <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
+                    gill.color + stem.color + habitat + habitat*season + 
+                    cap.shape*cap.color,
+                    data = mushrooms, family = "binomial")
+anova(main_model, full_model, test = "Chisq") |> 
+  tidy() |> 
+  kable(digits = 3)
+```
+
+Since the p-value is low, we decide to include these interaction terms.
+
+```{r}
+glance(main_model)$AIC
+glance(full_model)$AIC
+glance(main_model)$BIC
+glance(full_model)$BIC
+```
+
+For both AIC and BIC, the model with the interaction effect does much better in comparison to the main model.
+
 ## Initial modeling
 
 ::: panel-tabset
@@ -341,11 +383,6 @@ $$
 ### Tidy Output
 
 ```{r}
-# Convert the response variable to binary (e = 0, p = 1)
-mushrooms <- mushrooms |>
-  mutate(
-    class_binary = ifelse(mushrooms$class == "e", 0, 1)
-  )
 
 set.seed(123)  # for reproducibility
 split <- sample.split(mushrooms$class_binary, SplitRatio = 0.7)
