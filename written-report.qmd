@@ -335,6 +335,16 @@ ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
 
 Finally, we look at multivariate data analysis including 2 predictors and our response variable. Here, we visualize the effect of both stem width and stem height on the response variable, `class`. Interestingly, it seems like mushrooms with either high stem width or stem height seem to be edible. This suggests there may be some potential interaction effects between stem height and stem width – the low value of one alone does not seem to predict if the mushroom is poisonous, but requires the low value of both.
 
+## Analysis
+
+The base model:
+
+$$
+\log\left(\frac{\text{P}(\text{class = poisonous})}{\text{P}(\text{class = edible})}\right) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} + \beta_4 \cdot \text{cap.color} \\+ \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat}
+$$
+
+Predictor terms were choosen from exploratory data analysis and general physical or environmental factors that are generally understood and easy to evaluate by everyone. To determine the usefulness of these selected predictor terms a likelihood ratio test was performed.
+
 ```{r}
 #| label: Overall Significance F Test (Likelihood Ratio Test)
 null_model <- glm(class_binary ~ 1, data = mushrooms, family = "binomial")
@@ -345,9 +355,24 @@ main_model <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
 (L_a <- glance(main_model)$logLik)
 (G <- -2 * (L_0 - L_a)) #LRT test statistic
 (p_value <- pchisq(G, df = 3, lower.tail = FALSE))
+anova(null_model, main_model, test = "Chisq") |> 
+  tidy() |> 
+  kable(digits = 3)
 ```
 
-The p-value is small, so we reject the $H_0$. The data provide evidence of at least one non-zero model coefficient in the model.
+$$
+H_0: \beta_j = 0 \\ H_a: \beta_j \neq 0 \ for\ at\ least\ 1\ j
+$$
+
+Since the p-value is small, and less than $\alpha = 0.05$, we reject the $H_0$. The data provide sufficent evidence of at least one non-zero coefficient in the model.
+
+To determine adding interaction terms, a drop in deviance test was performed with the added interaction terms of habitat*season and cap.shape*cap.color.
+
+#what if we remove cap.diameter and kept stem height and width, and had an interaction term of the two?
+
+#Why is df so high?
+
+#High p-values in tidy table of full_model? Is that a point of concern?
 
 ```{r}
 #| label: Drop-in-deviance Test
@@ -360,7 +385,9 @@ anova(main_model, full_model, test = "Chisq") |>
   kable(digits = 3)
 ```
 
-Since the p-value is low, we decide to include these interaction terms.
+Since the p-value is low, below $\alpha = 0.05$, we decide to include these interaction terms as there is convincing evidence that at least one of these interactive term coefficients are not 0 and thus helpful in the model.
+
+Additionally, we looked at BIC and BIC to evaluate the base model in comparison with the interactive model.
 
 ```{r}
 glance(main_model)$AIC
@@ -371,16 +398,7 @@ glance(full_model)$BIC
 
 For both AIC and BIC, the model with the interaction effect does much better in comparison to the main model.
 
-## Initial modeling
-
-::: panel-tabset
-### Simple Model
-
-$$
-\text{logit}(Odds(\text{class} = p)) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season}
-$$
-
-### Tidy Output
+## Model Results
 
 ```{r}
 
@@ -389,34 +407,53 @@ split <- sample.split(mushrooms$class_binary, SplitRatio = 0.7)
 train_data <- subset(mushrooms, split == TRUE)
 test_data <- subset(mushrooms, split == FALSE)
 
-model <- glm(class_binary ~ cap.diameter + season, data = train_data, family = binomial)
-
-tidy(model) |>
+tidy(full_model) |>
   kable(digits = 3)
 ```
 
-### Confusion Matrix
+### Final Model
+
+\$\$
+
+\text{log}(\text{Odds}(\text{class\_binary} = p)) = \beta\_0 + \beta\_1 \cdot \text{cap.diameter} + \beta\_2 \cdot \text{season} + \beta\_3 \cdot \text{cap.shape} + \beta\_4 \cdot \text{cap.color} \\+ \beta\_5 \cdot \text{gill.color} + \beta\_6 \cdot \text{stem.color} + \beta\_7 \cdot \text{habitat} + \beta\_8 \cdot (\text{habitat} \cdot \text{season}) + \beta\_9 \cdot (\text{cap.shape} \cdot \text{cap.color})
+
+\$\$ \### Confusion Matrix and ROC
 
 class binary: edible = 0, poisonous = 1
 
 ```{r}
-# Make predictions
-predicted_probs <- predict(model, test_data, type = "response")
-predicted_classes <- ifelse(predicted_probs > 0.5, 1, 0) # cutoff is p = 0.5
+test_data$class_binary <- as.factor(test_data$class_binary)
+predicted_values <- predict(full_model, test_data, type = "response")
+test_data <- test_data |> 
+  mutate(pred_prob = predicted_values)
 
-# Evaluate model
-confusionMatrix(as.factor(predicted_classes), as.factor(test_data$class_binary))
+roc_curve_data <- test_data |>
+  roc_curve(class_binary, pred_prob, event_level = "second")
+autoplot(roc_curve_data)
+
+test_data_aug <- augment(full_model, newdata = test_data)
+test_data_aug$class_binary <- as.factor(test_data_aug$class_binary)
+test_data_aug |>
+  roc_auc(class_binary, .fitted, event_level = "second")
 ```
-:::
 
-## Next steps + questions
+```{r}
+threshold <- 0.5
+test_data <- test_data |> 
+  mutate(
+    pred_class = case_when(
+      pred_prob < threshold ~ 0,
+      TRUE ~ 1
+    )
+  )
 
-::: incremental
--   Determine the need of interaction terms
--   Test more specified models
--   Evaluate an efficient parsimonious model
--   Optimize on p cutoff
--   Sensitivity vs. specificity
-:::
+test_data$pred_class <- as.factor(test_data$pred_class)
+conf_mat <- test_data |>
+  conf_mat(class_binary, pred_class)
+autoplot(conf_mat, type = "heatmap")
+```
 
-## References
+The model is decent as the AUC is 0.816 which is closer to 1 than 0.5. In a specified model, the threshold is determined to be p = \_\_ because the false positives are more "expensive" than the false negatives as eating a poisonous mushroom can be detrimental to one's health. We are better to be overly cautious and let our model predict more false negatives for a trade off of less false positives.
+#Need code to determine the p value
+
+\## References
