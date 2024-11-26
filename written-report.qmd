@@ -37,6 +37,21 @@ mushrooms <- mushrooms |>
   mutate(
     class_binary = ifelse(mushrooms$class == "e", 0, 1)
   )
+
+# Simplified some categorical variables
+mushrooms <- mushrooms |>
+  mutate(
+    stem.color.modified = case_when(
+      stem.color %in% c("w", "y", "n") ~ stem.color, TRUE ~ "Other"),
+    habitat.modified = case_when(
+      habitat %in% c("d", "g") ~ habitat, TRUE ~ "Other")
+  )
+
+#Split data into train and test
+set.seed(123)  # for reproducibility
+split <- sample.split(mushrooms$class_binary, SplitRatio = 0.7)
+train_data <- subset(mushrooms, split == TRUE)
+test_data <- subset(mushrooms, split == FALSE)
 ```
 
 ## Introduction
@@ -342,23 +357,35 @@ The base model:
 $$
 \log\left(\frac{\text{P}(\text{class = poisonous})}{\text{P}(\text{class = edible})}\right) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} + \beta_4 \cdot \text{cap.color} \\+ \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat}
 $$
-
-Predictor terms were chosen from exploratory data analysis and general physical or environmental factors that are generally understood and easy to evaluate by everyone. To determine the usefulness of these selected predictor terms a likelihood ratio test was performed.
+Predictor terms were chosen from exploratory data analysis and general physical or environmental factors that are generally understood and easy to evaluate by everyone. To determine the usefulness of these selected predictor terms we first decided to look at the coefficients from the tidy function.
 
 ```{r}
-#| label: Overall Significance F Test (Likelihood Ratio Test)
-null_model <- glm(class_binary ~ 1, data = mushrooms, family = "binomial")
+#| label: Tidy Table
 main_model <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
                     gill.color + stem.color + habitat, 
                     data = mushrooms, family = "binomial")
-(L_0 <- glance(null_model)$logLik)
-(L_a <- glance(main_model)$logLik)
-(G <- -2 * (L_0 - L_a)) #LRT test statistic
-(p_value <- pchisq(G, df = 3, lower.tail = FALSE))
-anova(null_model, main_model, test = "Chisq") |> 
+main_model |>
+  tidy() |>
+  kable(digits = 3)
+```
+The Wald's Significance Tests for multiple coefficients of the same predictor variables reveals that for certain categories there may be limited data (also seen through EDA) and such there may be tons of coefficients that are not helpful in prediction. For these variables we aim to transform them into fewer categories for the simplicity of our model. Stem.color of "w", "y"m and "n" were kept while the other observations were assigned "Other". For habitat, "d" and "g" were kept.
+
+Now lets look at the tidy table again and run a likelihood ratio test to evaluate the overall significance of the coefficents of the new model with modified categorical variables.
+
+```{r}
+#| label: Overall Significance F Test Redone with Modified Categoricals (Likelihood Ratio Test)
+null_model <- glm(class_binary ~ 1, data = mushrooms, family = "binomial")
+main_model_modified <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
+                    gill.color + stem.color.modified + habitat.modified, 
+                    data = mushrooms, family = "binomial")
+#(L_0 <- glance(null_model)$logLik)
+#(L_a <- glance(main_model_modified)$logLik)
+#(G <- -2 * (L_0 - L_a)) #LRT test statistic
+#(p_value <- pchisq(G, df = 3, lower.tail = FALSE))
+anova(null_model, main_model_modified, test = "Chisq") |> 
   tidy() |> 
   kable(digits = 3)
-main_model |>
+main_model_modified |>
   tidy() |>
   kable(digits = 3)
 ```
@@ -378,14 +405,14 @@ To determine adding interaction terms, a drop in deviance test was performed wit
 
 Make height of the bivariate taller, and describes trends, don't really need univariate EDA. Simplify categories of some predictors to change with p-values. All the modeling should be done with the training set. Prediction- AUC, BIC as priority. Add more to the tables so we can remove univariate eda.
 ```{r}
-#| label: Drop-in-deviance Testca
+#| label: Drop-in-deviance Test
 
 full_model <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
-                    gill.color + stem.color + habitat + habitat*season + 
+                    gill.color + stem.color.modified + habitat.modified + habitat.modified*season + 
                     cap.shape*cap.color,
                     data = mushrooms, family = "binomial")
 
-anova(main_model, full_model, test = "Chisq") |> 
+anova(main_model_modified, full_model, test = "Chisq") |> 
   tidy() |> 
   kable(digits = 3)
 ```
@@ -395,16 +422,16 @@ Since the p-value is low, below $\alpha = 0.05$, we decide to include these inte
 Additionally, we looked at BIC and BIC to evaluate the base model in comparison with the interactive model.
 
 ```{r}
-glance(main_model)$AIC
+glance(main_model_modified)$AIC
 glance(full_model)$AIC
-glance(main_model)$BIC
+glance(main_model_modified)$BIC
 glance(full_model)$BIC
 ```
 
 For both AIC and BIC, the model with the interaction effect does much better in comparison to the main model.
 
 ```{r, eval=FALSE}
-#| label: more interactino effects/vars?
+#| label: more interaction effects/vars?
 
 full_model2 <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
                     gill.color + habitat + stem.root*stem.color + veil.type + veil.color +
@@ -430,20 +457,13 @@ glance(full_model3)$BIC
 
 ```{r}
 
-set.seed(123)  # for reproducibility
-split <- sample.split(mushrooms$class_binary, SplitRatio = 0.7)
-train_data <- subset(mushrooms, split == TRUE)
-test_data <- subset(mushrooms, split == FALSE)
-
-tidy(full_model) |>
-  kable(digits = 3)
 ```
 
 ### Final Model
 
 $$
 \log(\text{Odds(class = poisonous}) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} \\+
- \beta_4 \cdot \text{cap.color} + \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat} + \beta_8 \cdot (\text{habitat} \cdot \text{season}) \\ + \beta_9 \cdot (\text{cap.shape} \cdot \text{cap.color})
+ \beta_4 \cdot \text{cap.color} + \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color.modified} + \beta_7 \cdot \text{habitat.modified} + \beta_8 \cdot (\text{habitat.modified} \cdot \text{season}) \\ + \beta_9 \cdot (\text{cap.shape} \cdot \text{cap.color})
 $$
 
 ### Confusion Matrix and ROC
