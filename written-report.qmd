@@ -343,7 +343,7 @@ $$
 \log\left(\frac{\text{P}(\text{class = poisonous})}{\text{P}(\text{class = edible})}\right) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} + \beta_4 \cdot \text{cap.color} \\+ \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat}
 $$
 
-Predictor terms were choosen from exploratory data analysis and general physical or environmental factors that are generally understood and easy to evaluate by everyone. To determine the usefulness of these selected predictor terms a likelihood ratio test was performed.
+Predictor terms were chosen from exploratory data analysis and general physical or environmental factors that are generally understood and easy to evaluate by everyone. To determine the usefulness of these selected predictor terms a likelihood ratio test was performed.
 
 ```{r}
 #| label: Overall Significance F Test (Likelihood Ratio Test)
@@ -413,11 +413,12 @@ tidy(full_model) |>
 
 ### Final Model
 
-\$\$
+$$
+\text{log}(\text{Odds}(\text{class_binary} = p)) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} \\+
+ \beta_4 \cdot \text{cap.color} + \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat} + \beta_8 \cdot (\text{habitat} \cdot \text{season}) \\ + \beta_9 \cdot (\text{cap.shape} \cdot \text{cap.color})
+$$
 
-\text{log}(\text{Odds}(\text{class\_binary} = p)) = \beta\_0 + \beta\_1 \cdot \text{cap.diameter} + \beta\_2 \cdot \text{season} + \beta\_3 \cdot \text{cap.shape} + \beta\_4 \cdot \text{cap.color} \\+ \beta\_5 \cdot \text{gill.color} + \beta\_6 \cdot \text{stem.color} + \beta\_7 \cdot \text{habitat} + \beta\_8 \cdot (\text{habitat} \cdot \text{season}) + \beta\_9 \cdot (\text{cap.shape} \cdot \text{cap.color})
-
-\$\$ \### Confusion Matrix and ROC
+\### Confusion Matrix and ROC
 
 class binary: edible = 0, poisonous = 1
 
@@ -447,13 +448,21 @@ test_data <- test_data |>
     )
   )
 
+
 test_data$pred_class <- as.factor(test_data$pred_class)
 conf_mat <- test_data |>
   conf_mat(class_binary, pred_class)
 autoplot(conf_mat, type = "heatmap")
+
+roc_curve_data |>
+  filter(sensitivity <= 0.95) |>
+  head()
+
+conf_mat_new <- test_data |>
+  conf_mat(class_binary, pred_class, thresh = 0.255)
+autoplot(conf_mat_new, type = "heatmap")
 ```
 
-The model is decent as the AUC is 0.816 which is closer to 1 than 0.5. In a specified model, the threshold is determined to be p = \_\_ because the false positives are more "expensive" than the false negatives as eating a poisonous mushroom can be detrimental to one's health. We are better to be overly cautious and let our model predict more false negatives for a trade off of less false positives.
-#Need code to determine the p value
+The model is decent as the AUC is 0.816 which is closer to 1 than 0.5. In a specified model, the threshold is determined to be p = \_\_ because the false positives are more "expensive" than the false negatives as eating a poisonous mushroom can be detrimental to one's health. We are better to be overly cautious and let our model predict more false negatives for a trade off of less false positives. #Need code to determine the p value
 
 \## References
