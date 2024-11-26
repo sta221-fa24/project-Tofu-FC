@@ -366,7 +366,7 @@ $$
 
 Since the p-value is small, and less than $\alpha = 0.05$, we reject the $H_0$. The data provide sufficent evidence of at least one non-zero coefficient in the model.
 
-To determine adding interaction terms, a drop in deviance test was performed with the added interaction terms of habitat*season and cap.shape*cap.color.
+To determine adding interaction terms, a drop in deviance test was performed with the added interaction terms of habitat \* seasonand cap.shape \* cap.color.
 
 #what if we remove cap.diameter and kept stem height and width, and had an interaction term of the two?
 
@@ -375,11 +375,13 @@ To determine adding interaction terms, a drop in deviance test was performed wit
 #High p-values in tidy table of full_model? Is that a point of concern?
 
 ```{r}
-#| label: Drop-in-deviance Test
+#| label: Drop-in-deviance Testca
+
 full_model <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
                     gill.color + stem.color + habitat + habitat*season + 
                     cap.shape*cap.color,
                     data = mushrooms, family = "binomial")
+
 anova(main_model, full_model, test = "Chisq") |> 
   tidy() |> 
   kable(digits = 3)
@@ -397,6 +399,57 @@ glance(full_model)$BIC
 ```
 
 For both AIC and BIC, the model with the interaction effect does much better in comparison to the main model.
+
+```{r}
+#| label: more interactino effects/vars?
+
+full_model2 <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
+                    gill.color + habitat + stem.root*stem.color + veil.type + veil.color +
+                     has.ring + ring.type +
+                     cap.shape*cap.color + habitat*season,
+                   data = mushrooms, family="binomial")
+full_model3 <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
+                     gill.color + habitat + stem.root*stem.color + veil.type + veil.color + 
+                     has.ring*ring.type +gill.attachment*gill.spacing+
+                     cap.shape*cap.color + habitat*season,
+                   data = mushrooms, family="binomial")
+anova(full_model2, full_model3, test = "Chisq") |> 
+  tidy() |> 
+  kable(digits = 3)
+
+test_data$class_binary <- as.factor(test_data$class_binary)
+predicted_values <- predict(full_model2, test_data, type = "response")
+test_data <- test_data |> 
+  mutate(pred_prob = predicted_values)
+
+roc_curve_data <- test_data |>
+  roc_curve(class_binary, pred_prob, event_level = "second")
+autoplot(roc_curve_data)
+
+test_data_aug <- augment(full_model2, newdata = test_data)
+test_data_aug$class_binary <- as.factor(test_data_aug$class_binary)
+test_data_aug |>
+  roc_auc(class_binary, .fitted, event_level = "second")
+
+test_data$class_binary <- as.factor(test_data$class_binary)
+predicted_values <- predict(full_model3, test_data, type = "response")
+test_data <- test_data |> 
+  mutate(pred_prob = predicted_values)
+
+roc_curve_data <- test_data |>
+  roc_curve(class_binary, pred_prob, event_level = "second")
+autoplot(roc_curve_data)
+
+test_data_aug <- augment(full_model3, newdata = test_data)
+test_data_aug$class_binary <- as.factor(test_data_aug$class_binary)
+test_data_aug |>
+  roc_auc(class_binary, .fitted, event_level = "second")
+
+glance(full_model2)$AIC
+glance(full_model3)$AIC
+glance(full_model2)$BIC
+glance(full_model3)$BIC
+```
 
 ## Model Results
 
@@ -418,7 +471,7 @@ $$
  \beta_4 \cdot \text{cap.color} + \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat} + \beta_8 \cdot (\text{habitat} \cdot \text{season}) \\ + \beta_9 \cdot (\text{cap.shape} \cdot \text{cap.color})
 $$
 
-\### Confusion Matrix and ROC
+### Confusion Matrix and ROC
 
 class binary: edible = 0, poisonous = 1
 
@@ -439,7 +492,11 @@ test_data_aug |>
 ```
 
 ```{r}
-threshold <- 0.5
+roc_curve_data |>
+  filter(sensitivity <= 0.95) |>
+  head()
+
+threshold <- 0.255
 test_data <- test_data |> 
   mutate(
     pred_class = case_when(
@@ -451,18 +508,10 @@ test_data <- test_data |>
 
 test_data$pred_class <- as.factor(test_data$pred_class)
 conf_mat <- test_data |>
-  conf_mat(class_binary, pred_class)
+  yardstick::conf_mat(class_binary, pred_class)
 autoplot(conf_mat, type = "heatmap")
-
-roc_curve_data |>
-  filter(sensitivity <= 0.95) |>
-  head()
-
-conf_mat_new <- test_data |>
-  conf_mat(class_binary, pred_class, thresh = 0.255)
-autoplot(conf_mat_new, type = "heatmap")
 ```
 
 The model is decent as the AUC is 0.816 which is closer to 1 than 0.5. In a specified model, the threshold is determined to be p = \_\_ because the false positives are more "expensive" than the false negatives as eating a poisonous mushroom can be detrimental to one's health. We are better to be overly cautious and let our model predict more false negatives for a trade off of less false positives. #Need code to determine the p value
 
-\## References
+## References
