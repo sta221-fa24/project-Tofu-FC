@@ -169,7 +169,7 @@ mushrooms |>
 
 We were first interested in seeing the relationship between our continuous, quantitative variables. While not totally linear, with correlations of $0.423$ and $0.436$, they graphs seem to be somewhat linear, with some redundancy in their information. Thus, for the rest of the EDA we will focus mainly on visualizing `cap.diameter`. We may consider adding them back for the final model, but were more interested in seeing some of the EDA with the categorical variables. The mean cap diameter is 6.734cm, with a SD of 5.265cm. The mean stem height is 6.582cm, with a SD of 3.37cm. The mean stem width is 12.149cm, with a SD of 10.036cm.
 
-```{r}
+```{r, eval=FALSE}
 #| label: univariate predictors
 
 p1 <- ggplot(mushrooms, aes(x = cap.diameter)) +
@@ -214,7 +214,7 @@ season: spring=s, summer=u, autumn=a, winter=w",
 
 To visualize the distribution of some of our predictor variables, we use a histogram for our continuous variable `cap.diameter` and bar graphs for our categorical variables. The distribution of cap diameter seems to be unimodal, skewed right. From the For qualitative variables, there appears to be more common physical and environmental characteristics. For cap shape, flat and convex tends to be the most common; for stem root the most common was "missing data" (which likely suggests that this may be a variable to remove); for stem color the most common is white, yellow, and brown; for habitat, woods is the most common (see above for code meanings); for season, autumn and summer tends to be the most common.
 
-```{r}
+```{r, fig.width=8, fig.height=10}
 #| label: bivariate EDA
 g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
     geom_boxplot() +
@@ -358,6 +358,9 @@ main_model <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
 anova(null_model, main_model, test = "Chisq") |> 
   tidy() |> 
   kable(digits = 3)
+main_model |>
+  tidy() |>
+  kable(digits = 3)
 ```
 
 $$
@@ -366,14 +369,14 @@ $$
 
 Since the p-value is small, and less than $\alpha = 0.05$, we reject the $H_0$. The data provide sufficent evidence of at least one non-zero coefficient in the model.
 
-To determine adding interaction terms, a drop in deviance test was performed with the added interaction terms of habitat \* seasonand cap.shape \* cap.color.
+To determine adding interaction terms, a drop in deviance test was performed with the added interaction terms of habitat \* season and cap.shape \* cap.color.
 
-#what if we remove cap.diameter and kept stem height and width, and had an interaction term of the two?
+#High p-values in tidy table of full_model? Is that a point of concern? The likelihood test is not picking up on stem color? Are the p-values for 1 term the wald's test? Intercept p value is super high, should we exclude it?
+#Testing anova with the full dataset not just the train dataset
 
-#Why is df so high?
+#EDA univariate or bivariate to make it shorter and more readable?
 
-#High p-values in tidy table of full_model? Is that a point of concern?
-
+Make height of the bivariate taller, and describes trends, don't really need univariate EDA. Simplify categories of some predictors to change with p-values. All the modeling should be done with the training set. Prediction- AUC, BIC as priority. Add more to the tables so we can remove univariate eda.
 ```{r}
 #| label: Drop-in-deviance Testca
 
@@ -400,7 +403,7 @@ glance(full_model)$BIC
 
 For both AIC and BIC, the model with the interaction effect does much better in comparison to the main model.
 
-```{r}
+```{r, eval=FALSE}
 #| label: more interactino effects/vars?
 
 full_model2 <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
@@ -416,34 +419,6 @@ full_model3 <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color 
 anova(full_model2, full_model3, test = "Chisq") |> 
   tidy() |> 
   kable(digits = 3)
-
-test_data$class_binary <- as.factor(test_data$class_binary)
-predicted_values <- predict(full_model2, test_data, type = "response")
-test_data <- test_data |> 
-  mutate(pred_prob = predicted_values)
-
-roc_curve_data <- test_data |>
-  roc_curve(class_binary, pred_prob, event_level = "second")
-autoplot(roc_curve_data)
-
-test_data_aug <- augment(full_model2, newdata = test_data)
-test_data_aug$class_binary <- as.factor(test_data_aug$class_binary)
-test_data_aug |>
-  roc_auc(class_binary, .fitted, event_level = "second")
-
-test_data$class_binary <- as.factor(test_data$class_binary)
-predicted_values <- predict(full_model3, test_data, type = "response")
-test_data <- test_data |> 
-  mutate(pred_prob = predicted_values)
-
-roc_curve_data <- test_data |>
-  roc_curve(class_binary, pred_prob, event_level = "second")
-autoplot(roc_curve_data)
-
-test_data_aug <- augment(full_model3, newdata = test_data)
-test_data_aug$class_binary <- as.factor(test_data_aug$class_binary)
-test_data_aug |>
-  roc_auc(class_binary, .fitted, event_level = "second")
 
 glance(full_model2)$AIC
 glance(full_model3)$AIC
@@ -467,7 +442,7 @@ tidy(full_model) |>
 ### Final Model
 
 $$
-\text{log}(\text{Odds}(\text{class_binary} = p)) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} \\+
+\log(\text{Odds(class = poisonous}) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} \\+
  \beta_4 \cdot \text{cap.color} + \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat} + \beta_8 \cdot (\text{habitat} \cdot \text{season}) \\ + \beta_9 \cdot (\text{cap.shape} \cdot \text{cap.color})
 $$
 
