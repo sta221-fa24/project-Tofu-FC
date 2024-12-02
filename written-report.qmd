@@ -22,6 +22,7 @@ library(GGally)
 library(gridExtra)
 library(grid)
 library(kableExtra)
+library(Stat2Data)
 library(caTools) # might need to install
 
 mushrooms <- read.csv2("data/mushrooms_dataset.csv")
@@ -439,7 +440,7 @@ $$
 H_0: \beta_j = 0 \\ H_a: \beta_j \neq 0 \ for\ at\ least\ 1\ j
 $$
 
-Since the p-value is small, and less than $\alpha = 0.05$, we reject the $H_0$. The data provide sufficient evidence of at least one non-zero coefficient in the model. The model coefficients and corresponding inferential statistics for our main model are shown in the appendix.
+Since the p-value is small, and less than $\alpha = 0.05$, we reject the $H_0$. The data provide sufficient evidence of at least one non-zero coefficient in the model. The model coefficients and corresponding inferential statistics for our main model are shown in the appendix (see Table 13).
 
 As shown on our EDA, we hypothesized there may be some potential interaction terms. To determine the need for them in our model, we performed a drop in deviance test with the added interaction terms of `habitat*season` and `cap.shape*cap.color`.
 
@@ -483,6 +484,17 @@ $$
  \beta_4 \cdot \text{cap.color} + \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color.modified} + \beta_7 \cdot \text{habitat.modified} + \beta_8 \cdot (\text{habitat.modified} \cdot \text{season}) \\
  + \beta_9 \cdot (\text{cap.shape} \cdot \text{cap.color})
 $$
+Full model coefficient can be seen in appendix (see Table 14).
+
+Coefficient Interpretation:
+- The coefficient for cap diameter is -0.060, which means that for each unit increase in the cap diameter, the log-odds of the mushroom being poisonous decreases by 0.060. In terms of odds, an increase in cap diameter decreases the odds of the mushroom being poisonous.
+- The coefficient for cap shape is -2.140. This suggests that, for mushrooms with a specific cap shape (represented by "p"), the log-odds of the mushroom being poisonous are 2.140 less than for mushrooms without that cap shape. The odds of the mushroom being poisonous decrease significantly when the cap shape is "p" compared to other shapes.
+- The coefficient for the interaction term season (w) * habitat.modified(g) is -1.026. This indicates that the combination of specific season and habitat conditions modifies the log-odds of the mushroom being poisonous by a factor of -1.026. The odds 
+
+Model Assumption:
+-Linearity: The log-odds appears to have a linear relationship with the quantitative predictor (see appendix).
+-Randomness: The data were curated randomly in different places in North America, and thus we assume this condition is met.
+-Independence: The observations are collected over a period of time, but in different regions and locations. For our analysis we assumed independent was met as the period did not span several years.
 
 ### ROC curve
 
@@ -519,8 +531,6 @@ test_data <- test_data |>
 
 The model is decent as the AUC is 0.797 which is closer to 1 than 0.5. We decided on a threshold of p = 0.247 to achieve a sensitivity of 95%, since we wanted to prioritize minimizing false negatives, which are more expensive – better to be careful than eat a poisonous mushroom classified as "edible".
 
-\$\$
-
 ```{r}
 #| label: confusion matrix
 
@@ -536,8 +546,7 @@ autoplot(conf_mat, type = "heatmap") +
 
 Using this threshold, we can evaluate our model's performance with a confusion matrix. As desired, for poisonous mushrooms, we are able to successfully classify 95% of them as poisonous. Our model struggles at correctly identifying mushrooms which are actually edible as edible, with a false positive rate of 73.7%. We were able to build a model that overall does much better (see appendix). However, this model requires many more variables, and becomes much more complex. For the purposes of this model, we wanted it to be applicable even in situations where humans found themselves having to assess edibility without many special tools or knowledge.
 
-## References
-
+\pagebreak
 ## Appendix
 
 ```{r, fig.width=8, fig.height=6}
@@ -585,12 +594,15 @@ season: spring=s, summer=u, autumn=a, winter=w",
 
 Here is our original univariate EDA with the full visualizations.
 
+\pagebreak
+
 ```{r}
 #| label: multivariate EDA
 ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
   geom_point() +
   labs(
-    title = "Distribution of Stem Height vs. Stem Width Among Different Edibility Classes",
+    title = "Distribution of Stem Height vs. Stem Width Among Different
+    Edibility Classes",
     y = "Stem Height (cm)",
     x = "Stem Width (cm)",
     color = "Class (Edibile or Not)"
@@ -599,6 +611,8 @@ ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
 ```
 
 Here, we look at multivariate exploratory data analysis including 2 predictors and our response variable. We visualize the effect of both stem width and stem height on the response variable, class. Interestingly, it seems like mushrooms with either high stem width or stem height seem to be edible. This suggests there may be some potential interaction effects between stem height and stem width – the low value of one alone does not seem to predict if the mushroom is poisonous, but requires the low value of both. However, in our model when we added this interaction effect, the performance did not include that drastically, and we deemed it more important to keep the model parsimonious as possible. Additionally, quantitative features can be hard to measure, and so may be less practical when serving as a general guideline for foraging mushrooms.
+
+\pagebreak
 
 ```{r}
 #| label: more interaction effects/vars?
@@ -619,22 +633,94 @@ anova(full_model2, full_model3, test = "Chisq") |>
   kable_styling(font_size = 8) |> 
   column_spec(1, width = "3cm")
 
-glance(full_model2)$AIC
-glance(full_model3)$AIC
-glance(full_model2)$BIC
-glance(full_model3)$BIC
+aic_model2 <- glance(full_model2)$AIC
+aic_model3 <- glance(full_model3)$AIC
+bic_model2 <- glance(full_model2)$BIC
+bic_model3 <- glance(full_model3)$BIC
+
+narrative <- paste0(
+  "The AIC for the first model is: ", round(aic_model2, 2), 
+  ", while the AIC for second model is: ", round(aic_model3, 2), ". ",
+  "The BIC for first model is: ", round(bic_model2, 2), 
+  ", and the BIC for the second model is: ", round(bic_model3, 2), "."
+)
+
+# Print the narrative
+print(narrative)
 ```
 
 Here, we played with adding more predictors to our model. We do achieve better ROC curves with these as well, but we decided that a smaller model would still be better, and that many of these predictors that we added here may be hard to identify for the average person.
 
-```{r,}
+\pagebreak
+
+```{r}
 main_model_modified |>
   tidy() |>
   kable(digits = 3,
-        caption = "Final Main Model")
+        caption = "Final Main Model Coefficients")
 
 full_model |>
   tidy() |>
   kable(digits = 3,
-        caption = "Final Interactive Model")
+        caption = "Final Interactive Model Coefficients")
 ```
+
+\pagebreak
+
+```{r}
+#| label: Emperical logit
+
+# Cap diameter analysis
+emplogitplot1(class_binary ~ cap.diameter, data = train_data, 
+              ngroups = 20)
+
+# Cap shape analysis
+train_data |>
+  count(class_binary, cap.shape) |>
+  group_by(cap.shape) |>
+  mutate(prop = n / sum(n)) |>
+  filter(class_binary == "1") |>
+  mutate(emp_logit = log(prop / (1 - prop))) |>
+  ungroup()
+
+# Gill color analysis
+train_data |>
+  count(class_binary, gill.color) |>
+  group_by(gill.color) |>
+  mutate(prop = n / sum(n)) |>
+  filter(class_binary == "1") |>
+  mutate(emp_logit = log(prop / (1 - prop))) |>
+  ungroup()
+
+# Stem color analysis
+train_data |>
+  count(class_binary, stem.color.modified) |>
+  group_by(stem.color.modified) |>
+  mutate(prop = n / sum(n)) |>
+  filter(class_binary == "1") |>
+  mutate(emp_logit = log(prop / (1 - prop))) |>
+  ungroup()
+
+# Habitat analysis
+train_data |>
+  count(class_binary, habitat.modified) |>
+  group_by(habitat.modified) |>
+  mutate(prop = n / sum(n)) |>
+  filter(class_binary == "1") |>
+  mutate(emp_logit = log(prop / (1 - prop))) |>
+  ungroup()
+
+# Season analysis
+train_data |>
+  count(class_binary, season) |>
+  group_by(season) |>
+  mutate(prop = n / sum(n)) |>
+  filter(class_binary == "1") |>
+  mutate(emp_logit = log(prop / (1 - prop))) |>
+  ungroup()
+```
+Here is the calculated empirical logit plot for our only quantitative predictor variable and it appears to generally fit the linearity assumption. For the other qualitative predictor variables the emperical logic was calculated for the training dataset.
+
+\pagebreak
+
+## References
