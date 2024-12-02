@@ -20,10 +20,9 @@ library(dbplyr)
 library(knitr)
 library(GGally)
 library(gridExtra)
-library(caTools) # might need to install
-library(caret) # might need to install
 library(grid)
-# add other packages as needed
+library(kableExtra)
+library(caTools) # might need to install
 
 mushrooms <- read.csv2("data/mushrooms_dataset.csv")
 
@@ -82,7 +81,7 @@ Our response variable is `class`, which is a qualitative variable labeled "e" fo
 
 Because we want our classifier to be easily used by people, and quantitative predictors can be harder to measure, we will focus on only one. We are also interested in `cap.diameter`, the diameter of the mushroom cap (cm).
 
-Key qualitative predictor variables include `cap.shape`, the shape of the mushroom cap; `gill.color`, the color of the fungi gills, `stem.color`, the color of the mushroom stem; `habitat`, the habitat that the mushroom is grown/found; and `season`, the season that the mushroom is grown/found (spring=s, summer=u, autumn=a, winter=w).
+Key qualitative predictor variables include `cap.shape`, the shape of the mushroom cap; `gill.color`, the color of the fungi gills, `stem.color`, the color of the mushroom stem; `habitat`, the habitat that the mushroom is grown/found; and `season`, the season that the mushroom is grown/found. The key for the levels of each categorical variable are described on the following page.
 
 ## Exploratory Data Analysis
 
@@ -98,7 +97,8 @@ Key qualitative predictor variables include `cap.shape`, the shape of the mushro
 mushrooms |>
   count(class) |>
   mutate(percentage = round(n / sum(n),3)) |>
-  kable(digits=3)
+  kable(digits=3,
+        caption = "Distribution of Classes")
 ```
 
 ```{r, eval=FALSE}
@@ -199,13 +199,9 @@ mushrooms |>
         caption = "cap diameter summary statistics")
 ```
 
-Visualizing the shape of our quantitative predictor, cap diameter, the distribution seems to be roughly unimodal, skewed right. The mean cap diameter is 6.734cm, with a standard deviation of 5.265cm.
+Visualizing the shape of our quantitative predictor, cap diameter, the distribution seems to be roughly unimodal, skewed right. The mean cap diameter is 6.734 cm, with a standard deviation of 5.265 cm.
 
 Since the rest of our predictors our qualitative, we report their distributions through the tables below:
-
-| g       | l      | m       | p     | h      | u     | w     | d     |
-|---------|--------|---------|-------|--------|-------|-------|-------|
-| grasses | leaves | meadows | paths | heaths | urban | waste | woods |
 
 ```{r}
 capshapecodes <- c("bell", "conical", "flat", "other", "spherical", "sunken", "convex")
@@ -223,7 +219,8 @@ rotated_data <- as.data.frame(t(temp_data[, -2]))
 # colnames(rotated_data) = rotated_data[1,]
 colnames(rotated_data) = capshapecodes
 rownames(rotated_data) = rownames(rotated_data)
-rotated_data |> kable(digits=3)
+rotated_data |> kable(digits=3) |> 
+  kable_styling(font_size = 8)
 
 temp_data <- mushrooms |>
   count(cap.color) |>
@@ -232,7 +229,8 @@ temp_data <- mushrooms |>
 rotated_data <- as.data.frame(t(temp_data[, -2]))  
 rownames(rotated_data) = rownames(rotated_data)
 colnames(rotated_data) = capcolorcodes
-rotated_data |> kable(digits=3)
+rotated_data |> kable(digits=3) |> 
+  kable_styling(font_size = 8)
 
 temp_data <- mushrooms |>
   count(habitat) |>
@@ -241,7 +239,8 @@ temp_data <- mushrooms |>
 rotated_data <- as.data.frame(t(temp_data[, -2]))
 rownames(rotated_data) = rownames(rotated_data)
 colnames(rotated_data) = habitatcodes
-rotated_data |> kable(digits=3)
+rotated_data |> kable(digits=3) |> 
+  kable_styling(font_size = 8)
 
 
 temp_data <- mushrooms |>
@@ -251,7 +250,8 @@ temp_data <- mushrooms |>
 rotated_data <- as.data.frame(t(temp_data[, -2]))
 colnames(rotated_data) = seasoncodes
 rownames(rotated_data) = rownames(rotated_data)
-rotated_data |> kable(digits=3)
+rotated_data |> kable(digits=3) |> 
+  kable_styling(font_size = 8)
 
 
 temp_data <- mushrooms |>
@@ -261,7 +261,8 @@ temp_data <- mushrooms |>
 rotated_data <- as.data.frame(t(temp_data[, -2]))
 colnames(rotated_data) = stemcolorcodes
 rownames(rotated_data) = rownames(rotated_data)
-rotated_data |> kable(digits=3)
+rotated_data |> kable(digits=3) |> 
+  kable_styling(font_size = 8)
 
 
 temp_data <- mushrooms |>
@@ -271,7 +272,8 @@ temp_data <- mushrooms |>
 rotated_data <- as.data.frame(t(temp_data[, -2]))
 colnames(rotated_data) = gillcolorcodes
 rownames(rotated_data) = rownames(rotated_data)
-rotated_data |> kable(digits=3)
+rotated_data |> kable(digits=3) |> 
+  kable_styling(font_size = 8)
 
 ```
 
@@ -326,7 +328,7 @@ Looking at this bivariate exploratory data analysis, we see that, on average, sm
 
 One interaction term we were interested in looking at is `habitat*season`. Mushrooms that grow in the same habitat may have different toxicity classification depending on if being poisonous is needed to defend against predators. The number of predators themselves may vary depending on season, so season may change how habitat affects the log-odds of whether the mushroom is edible or poisonous.
 
-```{r}
+```{r, fig.width=8, fig.height=4}
 #| label: analysis of interaction
 
 ggplot(mushrooms, aes(x = habitat, fill = class)) +
@@ -341,11 +343,11 @@ ggplot(mushrooms, aes(x = habitat, fill = class)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Looking at this graph, we see that mushrooms in certain habitats might only be edible during specific seasons. For example, mushrooms in the meadows are edible in the winter, but may be poisonous in other seasons. This suggests we may want to incorporate this interaction term into our final model.
+Looking at this graph, we see that mushrooms in certain habitats might only be edible during specific seasons. For example, mushrooms in the meadows are edible exclusively in the winter, but may be poisonous in other seasons. This suggests we may want to incorporate this interaction term into our final model.
 
-We were also interested in looking at the interaction between cap color and cap shape, as these are two of the characteristics which are most apparent to a potential predator.
+We were also interested in looking at the interaction between cap color and cap shape, as these are two of the characteristics which are most apparent to a potential predator and natural selection may have led to some traits evolving together.
 
-```{r}
+```{r, fig.width=8, fig.height=4}
 #| label: heatmap
 
 mushroom_prop <- mushrooms |>
@@ -397,7 +399,8 @@ The base model:
 
 $$
 \log\left(\frac{\text{P}(\text{class = poisonous})}{\text{P}(\text{class = edible})}\right) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} + \beta_4 \cdot \text{cap.color} \\+ \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat}
-$$Predictor terms were chosen from the EDA and general physical or environmental factors that are generally understood and easy to evaluate by everyone. To determine if any predictors may not useful, we looked at coefficients from the tidy function with p-values greater than 0.01
+$$
+Predictor terms were chosen from the EDA and general physical or environmental factors that are generally understood and easy to evaluate by everyone. To determine if any predictors may not useful, we looked at coefficients from the tidy function with p-values greater than 0.01
 
 ```{r}
 #| label: Tidy Table
@@ -412,7 +415,7 @@ main_model |>
 
 The Wald's Significance Tests for coefficients of multiple categories of the same predictor variables reveals that for certain categories there may be limited data (also seen through EDA) and/or limited predictive power. For simplicity of our model, we combine these categories into a general "Other" category. For example, `stem.color` of "w", "y", and "n" were kept while the other observations were assigned to a general "Other" category. For habitat, "d" and "g" were kept.
 
-Running a likelihood ratio test to evaluate the overall significance of the coefficents of the new model with modified categorical variables, we have:
+Running a likelihood ratio test to evaluate the overall significance of the coefficients of the new model with modified categorical variables, we have:
 
 ```{r}
 #| label: Overall Significance F Test Redone with Modified Categoricals (Likelihood Ratio Test)
@@ -427,22 +430,16 @@ main_model_modified <- glm(class_binary ~ cap.diameter + season + cap.shape + ca
 anova(null_model, main_model_modified, test = "Chisq") |> 
   tidy() |> 
   select(-df.residual) |>
-  kable(digits = 3)
+  kable(digits = 3) |> 
+  kable_styling(font_size = 8) |> 
+  column_spec(1, width = "3cm")
 ```
 
 $$
 H_0: \beta_j = 0 \\ H_a: \beta_j \neq 0 \ for\ at\ least\ 1\ j
 $$
 
-Since the p-value is small, and less than $\alpha = 0.05$, we reject the $H_0$. The data provide sufficent evidence of at least one non-zero coefficient in the model.
-
-The model coefficients and corresponding inferential statistics are shown below:
-
-```{r}
-main_model_modified |>
-  tidy() |>
-  kable(digits = 3)
-```
+Since the p-value is small, and less than $\alpha = 0.05$, we reject the $H_0$. The data provide sufficient evidence of at least one non-zero coefficient in the model. The model coefficients and corresponding inferential statistics for our main model are shown in the appendix.
 
 As shown on our EDA, we hypothesized there may be some potential interaction terms. To determine the need for them in our model, we performed a drop in deviance test with the added interaction terms of `habitat*season` and `cap.shape*cap.color`.
 
@@ -467,7 +464,9 @@ full_model <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
 anova(main_model_modified, full_model, test = "Chisq") |> 
   tidy() |> 
   select(-df.residual) |>
-  kable(digits = 3)
+  kable(digits = 3) |> 
+  kable_styling(font_size = 8) |> 
+  column_spec(1, width = "3cm")
 ```
 
 Since the p-value is low below $\alpha = 0.05$, we decide to include these interaction terms as there is convincing evidence that at least one of these interactive term coefficients are not 0 and thus helpful in the model.
@@ -541,14 +540,14 @@ Using this threshold, we can evaluate our model's performance with a confusion m
 
 ## Appendix
 
-```{r}
+```{r, fig.width=8, fig.height=6}
 #| label: univariate predictors
 
 p1 <- ggplot(mushrooms, aes(x = cap.diameter)) +
     geom_histogram() +
   geom_vline(xintercept=mean(mushrooms$cap.diameter), color="red") +
     theme_minimal() +
-    labs(title = "Cap diameter",
+    labs(title = "Distribution of cap diameter",
          x="Cap diameter",
          caption = "mean: 6.734; SD: 5.265")
 p2 <- ggplot(mushrooms, aes(x = cap.shape)) +
@@ -584,7 +583,7 @@ season: spring=s, summer=u, autumn=a, winter=w",
                                                  gp = gpar(fontsize = 8)))
 ```
 
-Here is our original univariate EDA with the full visualizations. As
+Here is our original univariate EDA with the full visualizations.
 
 ```{r}
 #| label: multivariate EDA
@@ -616,7 +615,9 @@ full_model3 <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color 
                    data = mushrooms, family="binomial")
 anova(full_model2, full_model3, test = "Chisq") |> 
   tidy() |> 
-  kable(digits = 3)
+  kable(digits = 3, escape = TRUE) |> 
+  kable_styling(font_size = 8) |> 
+  column_spec(1, width = "3cm")
 
 glance(full_model2)$AIC
 glance(full_model3)$AIC
@@ -625,3 +626,15 @@ glance(full_model3)$BIC
 ```
 
 Here, we played with adding more predictors to our model. We do achieve better ROC curves with these as well, but we decided that a smaller model would still be better, and that many of these predictors that we added here may be hard to identify for the average person.
+
+```{r,}
+main_model_modified |>
+  tidy() |>
+  kable(digits = 3,
+        caption = "Final Main Model")
+
+full_model |>
+  tidy() |>
+  kable(digits = 3,
+        caption = "Final Interactive Model")
+```
