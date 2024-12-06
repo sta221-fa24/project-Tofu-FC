@@ -64,11 +64,11 @@ The importance of this research has been highlighted in a multitude of studies. 
 
 > The ingestion of wild and potentially toxic mushrooms is common in the United States, with poison centers logging cases in the National Poison Data System (NPDS) for over 30 years. From 1999 to 2016, there were 133,700 reported cases of mushroom exposure, mostly unintentional and involving children under six years old. While the majority of cases resulted in no or minor harm, there were 704 instances of major harm and 52 fatalities, primarily due to cyclopeptide-producing mushrooms ingested unintentionally by older adults. Misidentification of edible mushroom species is a common cause of poisoning and may be preventable through education [@brandenburgward2018].
 
-As shown by studies and other similar studies, accurate classification of mushrooms is crucial for preventing poisoning incidents. Many toxic mushroom species closely resemble edible varieties, making it easy for foragers to misidentify them. Thus, our research will focus on what physical features and environmental factors of mushrooms humans can use to identify toxic/poisonous mushrooms in the wild. By conducting a research study on how to distinguish between safe and dangerous species, we can mitigate the incidence of mushroom poisoning and ensure safer foraging practices.
+As shown by studies and other similar studies, accurate classification of mushrooms is crucial for preventing poisoning incidents. Many toxic mushroom species closely resemble edible varieties, making it easy for foragers to misidentify them. Thus, our research will focus on what physical features and environmental factors of mushrooms humans foragers can use to identify toxic/poisonous mushrooms in the wild. By conducting a research study on how to distinguish between safe and dangerous species, we can mitigate the incidence of mushroom poisoning and ensure safer foraging practices.
 
 ### Research Question:
 
-What environmental factors and/or physical features of mushrooms indicate that a wild mushroom is poisonous?
+What environmental factors and/or physical features of mushrooms help indicate that a wild mushroom is poisonous or edible?
 
 ### Hypothesis:
 
@@ -80,9 +80,11 @@ The data was curated on April 26, 1987, and submitted to the UCI by the National
 
 Our response variable is `class`, which is a qualitative variable labeled "e" for edible or "p" for poisonous.
 
-Because we want our classifier to be easily used by people, and quantitative predictors can be harder to measure, we will focus on only one. We are also interested in `cap.diameter`, the diameter of the mushroom cap (cm).
+Because we want our classifier to be easily used by people, and quantitative predictors can be harder to measure, we will focus on only one. That is `cap.diameter`, the diameter of the mushroom cap (cm).
 
-Key qualitative predictor variables include `cap.shape`, the shape of the mushroom cap; `gill.color`, the color of the fungi gills, `stem.color`, the color of the mushroom stem; `habitat`, the habitat that the mushroom is grown/found; and `season`, the season that the mushroom is grown/found. The key for the levels of each categorical variable are described on the following page.
+Key qualitative predictor variables include `cap.shape`, the shape of the mushroom cap; `gill.color`, the color of the fungi gills, `stem.color`, the color of the mushroom stem; `habitat`, the habitat that the mushroom is grown/found; and `season`, the season that the mushroom is grown/found. The key for the levels of each categorical variable are described on the following page and in the data dictionary.
+
+The data dictionary can be found [here](https://github.com/sta221-fa24/project-Tofu-FC/blob/main/data/README.md). There are 61069 total observations, each row represent a mushroom's physical features and also the environment it was found in.
 
 ## Exploratory Data Analysis
 
@@ -394,14 +396,23 @@ ggplot(mushroom_prop, aes(x = cap.color, y = cap.shape,
 
 As the heatmap shows, certain combinations of cap color and cap shape are always edible or poisonous. Additionally, the log ratios across combinations of cap colors and cap sizes are varied with no pattern – for a mushroom with a sunken cap shape, it could be always edible (if the color is buff) to always poisonous (if the color is red). Similarly, if a mushroom is brown, it could be high likely it is edible (if the cap shape is conical) or likely it is poisonous (if the cap shape is bell). Thus, we may have to consider this interaction effect in our final model.
 
-## Analysis
+## Methodology/Analysis
 
-The base model:
+### Model Assumption:
+
+Based of our goals, a logistic regression was used. Below are the assumptions necessary for a logistic regression fit.
+
+-Linearity: The log-odds appears to have a linear relationship with the quantitative predictor (see appendix).
+
+-Randomness: The data were curated randomly in different places in North America, and thus we assume this condition is met.
+
+-Independence: The observations are collected over a period of time, but in different regions and locations. For our analysis we assumed independent was met as the period did not span several years.
+
+### The base model:
 
 $$
 \log\left(\frac{\text{P}(\text{class = poisonous})}{\text{P}(\text{class = edible})}\right) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} + \beta_4 \cdot \text{cap.color} \\+ \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat}
-$$
-Predictor terms were chosen from the EDA and general physical or environmental factors that are generally understood and easy to evaluate by everyone. To determine if any predictors may not useful, we looked at coefficients from the tidy function with p-values greater than 0.01
+$$ Predictor terms were chosen from the EDA and general physical or environmental factors that are generally understood and easy to evaluate by everyone. To determine if any predictors may not useful, we looked at coefficients from the tidy function with p-values greater than 0.01
 
 ```{r}
 #| label: Tidy Table
@@ -441,6 +452,8 @@ H_0: \beta_j = 0 \\ H_a: \beta_j \neq 0 \ for\ at\ least\ 1\ j
 $$
 
 Since the p-value is small, and less than $\alpha = 0.05$, we reject the $H_0$. The data provide sufficient evidence of at least one non-zero coefficient in the model. The model coefficients and corresponding inferential statistics for our main model are shown in the appendix (see Table 13).
+
+### Interactive Terms
 
 As shown on our EDA, we hypothesized there may be some potential interaction terms. To determine the need for them in our model, we performed a drop in deviance test with the added interaction terms of `habitat*season` and `cap.shape*cap.color`.
 
@@ -483,18 +496,17 @@ $$
 +
  \beta_4 \cdot \text{cap.color} + \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color.modified} + \beta_7 \cdot \text{habitat.modified} + \beta_8 \cdot (\text{habitat.modified} \cdot \text{season}) \\
  + \beta_9 \cdot (\text{cap.shape} \cdot \text{cap.color})
-$$
-Full model coefficient can be seen in appendix (see Table 14).
+$$Full model coefficient can be seen in appendix (see Table 14).
 
-Coefficient Interpretation:
-- The coefficient for cap diameter is -0.060, which means that for each unit increase in the cap diameter, the log-odds of the mushroom being poisonous decreases by 0.060. In terms of odds, an increase in cap diameter decreases the odds of the mushroom being poisonous.
-- The coefficient for cap shape is -2.140. This suggests that, for mushrooms with a specific cap shape (represented by "p"), the log-odds of the mushroom being poisonous are 2.140 less than for mushrooms without that cap shape. The odds of the mushroom being poisonous decrease significantly when the cap shape is "p" compared to other shapes.
-- The coefficient for the interaction term season (w) * habitat.modified(g) is -1.026. This indicates that the combination of specific season and habitat conditions modifies the log-odds of the mushroom being poisonous by a factor of -1.026. The odds 
+### Coefficient Interpretation:
 
-Model Assumption:
--Linearity: The log-odds appears to have a linear relationship with the quantitative predictor (see appendix).
--Randomness: The data were curated randomly in different places in North America, and thus we assume this condition is met.
--Independence: The observations are collected over a period of time, but in different regions and locations. For our analysis we assumed independent was met as the period did not span several years.
+Below highlights some interesting coefficients for foragers to use to help them identify mushrooms that are more likely to be edible.
+
+\- The coefficient for cap diameter is -0.060, which means that for each 1 cm increase in the cap diameter, we expect the odds of the mushroom being poisonous multiplies by a factor of `{r} exp(-0.060)`, holding all else constant. In terms of odds, an increase in cap diameter decreases the odds of the mushroom being poisonous so the larger the cap diameter is the less likely the mushroom is poisonous.
+
+\- The coefficient for cap shape p is -2.140. This suggests that, for mushrooms with a spherical cap shape (represented by "p"), we expect the odds of the mushroom being poisonous are `{r} exp(-2.140)` times the odds of being poisonous for mushrooms of bell shaped (baseline), granted all else are held constant. This value is also called the adjusted odds ratio. The odds of the mushroom being poisonous decrease significantly when the cap shape is "p" compared to the baseline and is also evident in the bivariate EDA as when cap shape is "bell", the mushroom tends to be poisonous.
+
+\- The coefficient for the interaction term season(w) \* habitat.modified(g) is -1.026. This indicates that the combination of specific season (winter) and habitat (grasses) conditions modifies the expected odds of the mushroom being poisonous by a multiplicity factor of `{r} exp(-1.026)` times the odds of the mushroom being poisonous through an additive model of the same combination, while holding all other variables constant. This trend can be seen in the interactive term EDA as when season is winter and habitat is grasses we are more likely to observe an edible mushroom.
 
 ### ROC curve
 
@@ -546,7 +558,10 @@ autoplot(conf_mat, type = "heatmap") +
 
 Using this threshold, we can evaluate our model's performance with a confusion matrix. As desired, for poisonous mushrooms, we are able to successfully classify 95% of them as poisonous. Our model struggles at correctly identifying mushrooms which are actually edible as edible, with a false positive rate of 73.7%. We were able to build a model that overall does much better (see appendix). However, this model requires many more variables, and becomes much more complex. For the purposes of this model, we wanted it to be applicable even in situations where humans found themselves having to assess edibility without many special tools or knowledge.
 
+### Conclusion
+
 \pagebreak
+
 ## Appendix
 
 ```{r, fig.width=8, fig.height=6}
@@ -719,6 +734,7 @@ train_data |>
   mutate(emp_logit = log(prop / (1 - prop))) |>
   ungroup()
 ```
+
 Here is the calculated empirical logit plot for our only quantitative predictor variable and it appears to generally fit the linearity assumption. For the other qualitative predictor variables the emperical logic was calculated for the training dataset.
 
 \pagebreak
