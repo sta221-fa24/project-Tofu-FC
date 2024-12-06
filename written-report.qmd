@@ -84,7 +84,7 @@ Because we want our classifier to be easily used by people, and quantitative pre
 
 Key qualitative predictor variables include `cap.shape`, the shape of the mushroom cap; `gill.color`, the color of the fungi gills, `stem.color`, the color of the mushroom stem; `habitat`, the habitat that the mushroom is grown/found; and `season`, the season that the mushroom is grown/found. The key for the levels of each categorical variable are described on the following page and in the data dictionary.
 
-The data dictionary can be found [here](https://github.com/sta221-fa24/project-Tofu-FC/blob/main/data/README.md). There are 61069 total observations, each row represent a mushroom's physical features and also the environment it was found in.
+The data dictionary can be found [here](https://github.com/sta221-fa24/project-Tofu-FC/blob/main/data/README.md) [@wagnerheiderhattab2021]. There are 61069 total primary observations, each row represent a mushroom's physical features and also the environment it was found in.
 
 ## Exploratory Data Analysis
 
@@ -363,7 +363,6 @@ mushroom_prop <- mushroom_prop |>
   mutate(log_prop = log(proportion_e_to_p))
 
 
-
 ggplot(mushroom_prop, aes(x = cap.color, y = cap.shape, 
                           fill = log_prop)) +
   geom_tile() +
@@ -412,7 +411,7 @@ Based of our goals, a logistic regression was used. Below are the assumptions ne
 
 $$
 \log\left(\frac{\text{P}(\text{class = poisonous})}{\text{P}(\text{class = edible})}\right) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} + \beta_4 \cdot \text{cap.color} \\+ \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat}
-$$ Predictor terms were chosen from the EDA and general physical or environmental factors that are generally understood and easy to evaluate by everyone. To determine if any predictors may not useful, we looked at coefficients from the tidy function with p-values greater than 0.01
+$$Predictor terms were chosen from the EDA and general physical or environmental factors that are generally understood and easy to evaluate by everyone. To determine if any predictors may not useful, we looked at coefficients from the tidy function with p-values greater than 0.01
 
 ```{r}
 #| label: Tidy Table
@@ -448,7 +447,7 @@ anova(null_model, main_model_modified, test = "Chisq") |>
 ```
 
 $$
-H_0: \beta_j = 0 \\ H_a: \beta_j \neq 0 \ for\ at\ least\ 1\ j
+H_0: \beta_1,...,\beta_p = 0 \\ H_a: \beta_j \neq 0 \ for\ at\ least\ 1\ j
 $$
 
 Since the p-value is small, and less than $\alpha = 0.05$, we reject the $H_0$. The data provide sufficient evidence of at least one non-zero coefficient in the model. The model coefficients and corresponding inferential statistics for our main model are shown in the appendix (see Table 13).
@@ -456,16 +455,6 @@ Since the p-value is small, and less than $\alpha = 0.05$, we reject the $H_0$. 
 ### Interactive Terms
 
 As shown on our EDA, we hypothesized there may be some potential interaction terms. To determine the need for them in our model, we performed a drop in deviance test with the added interaction terms of `habitat*season` and `cap.shape*cap.color`.
-
-```{r, eval=FALSE}
-#| label: comments/to-dos
-
-#High p-values in tidy table of full_model? Is that a point of concern? The likelihood test is not picking up on stem color? Are the p-values for 1 term the wald's test? Intercept p value is super high, should we exclude it? #Testing anova with the full dataset not just the train dataset
-
-#EDA univariate or bivariate to make it shorter and more readable?
-
-#Make height of the bivariate taller, and describes trends, don't really need univariate EDA. Simplify categories of some predictors to change with p-values. All the modeling should be done with the training set. Prediction- AUC, BIC as priority. Add more to the tables so we can remove univariate eda.
-```
 
 ```{r}
 #| label: Drop-in-deviance Test
@@ -558,7 +547,71 @@ autoplot(conf_mat, type = "heatmap") +
 
 Using this threshold, we can evaluate our model's performance with a confusion matrix. As desired, for poisonous mushrooms, we are able to successfully classify 95% of them as poisonous. Our model struggles at correctly identifying mushrooms which are actually edible as edible, with a false positive rate of 73.7%. We were able to build a model that overall does much better (see appendix). However, this model requires many more variables, and becomes much more complex. For the purposes of this model, we wanted it to be applicable even in situations where humans found themselves having to assess edibility without many special tools or knowledge.
 
-### Conclusion
+## Conclusion
+
+There are many other significant predictors that helps in the identification of mushroom edibility, but among those that are most useful and easily interpretable, cap diameter, gill color, cap shape, cap color, and their interactions (e.g., habitat × season, cap shape × cap color) speaks the most on the probability of a mushroom being poisonous. We believe keeping a simple, parsimonious model with a high sensitivity was best for the context of our model's usefulness. Foragers are able to use the main effects model or interactive model or even take the general interpretation of the coefficients to identify the mushroom edibility.
+
+-   For example, the interaction of winter (season) and grasses (habitat) reduces the odds of toxicity significantly.
+
+-   Larger cap diameters are generally associated with lower odds of being poisonous.
+
+-   The final model performed well with an AUC of 0.797, achieving 95% sensitivity with a threshold of p = 0.247.
+
+-   It should be noted that although the additional interactive terms in the full model does seem to be useful despite adding complexity, it raises a lot of coefficient p-values due to the scarcity in data of specific combinations and therefore may not be best to use in practice.
+
+    -   **Model Fit**:
+
+        -   Logistic regression was appropriate for this binary classification problem.
+
+        -   Significance/Likelihood ratio test and Wald test (low observations was not an issue) was used to support the inclusion of the main model terms.
+
+        -   Drop-in-deviance test and reduced AIC/BIC values support the inclusion of interaction terms in the model. However, the inclusion of them led to low observation for some interactive coefficient making many of the coefficients uninterpretable in context for the interactive model.
+
+    -   **Predictor Significance**:
+
+        -   Many predictors in the main model showed high significance (p \< 0.05), suggesting their meaningful contribution to classifying mushrooms.
+
+        -   Interaction terms further improved the model, highlighting ecological relationships.
+
+### Limitations
+
+The dataset, collected in 1987 in North America, may not reflect contemporary mushroom populations or environmental changes and limits the model's generalization to other regions. Moreover, some categories (e.g., rare gill, stem colors, and combinations of characteristics and environmental features) have sparse data, potentially affecting the model's reliability. Lastly, the independence of observations for model assumption is assumed but not explicitly verified.
+
+------------------------------------------------------------------------
+
+### Suggestions for Improvement
+
+1.  **Data Collection**:
+
+    -   Include recent observations and expand the dataset to represent global mushroom species.
+
+    -   Improve data balance for rare categories through targeted sampling.
+
+2.  **Model Enhancements**:
+
+    -   Address multicollinearity by checking variance inflation factors (VIFs) for predictors with conceptual overlap.
+
+    -   Explore other statistical techniques (e.g., random forests or gradient boosting) for potentially higher accuracy and interpretability.
+
+3.  **Incorporate Additional Features**:
+
+    -   Include biochemical markers of toxicity, if available, to enhance classification power.
+
+------------------------------------------------------------------------
+
+### Future Work
+
+1.  **Validation on New Data**:
+
+    -   Test the model with mushrooms from other regions or under different environmental conditions to assess robustness.
+
+2.  **Integration with Technology**:
+
+    -   Develop a mobile application for real-time classification using the model.
+
+3.  **Safety Applications**:
+
+    -   Collaborate with public health organizations to create user-friendly guides or alerts for foragers.
 
 \pagebreak
 
