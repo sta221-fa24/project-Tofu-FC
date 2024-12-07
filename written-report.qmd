@@ -24,6 +24,7 @@ library(grid)
 library(kableExtra)
 library(Stat2Data)
 library(caTools) # might need to install
+library(rms)
 
 mushrooms <- read.csv2("data/mushrooms_dataset.csv")
 
@@ -60,23 +61,19 @@ test_data <- subset(mushrooms, split == FALSE)
 
 Mushrooms are vital to the general wellness of the ecosystem, decomposing and recycling the nutrients in the soil. Mushrooms also provide a valuable food source full of nutrients for human beings and other important organisms. However, some mushroom species can also be poisonous and harmful.
 
-The importance of this research has been highlighted in a multitude of studies. Take this quote, for example:
+The importance of this research has been highlighted in a multitude of studies. There have been over 130,000 reported cases of mushroom exposure from 1999 to 2016, with 704 of these incidents causing "major harm" and 52 being fatal [@brandenburgward2018]. Many of these cases are caused by the misidentification of edible mushroom species, and thus may be preventable through more accurate mushroom classification.
 
-> The ingestion of wild and potentially toxic mushrooms is common in the United States, with poison centers logging cases in the National Poison Data System (NPDS) for over 30 years. From 1999 to 2016, there were 133,700 reported cases of mushroom exposure, mostly unintentional and involving children under six years old. While the majority of cases resulted in no or minor harm, there were 704 instances of major harm and 52 fatalities, primarily due to cyclopeptide-producing mushrooms ingested unintentionally by older adults. Misidentification of edible mushroom species is a common cause of poisoning and may be preventable through education [@brandenburgward2018].
+Thus, our research will focus on what physical features and environmental factors of mushrooms humans foragers can use to identify toxic/poisonous mushrooms in the wild. For example, mushrooms in the wild with obvious physical features like white gills, white rings, red caps, or red stems tend to be poisonous. These obvious physical traits are more likely to be spotted by animals, which would provide an evolutionary disadvantage unless they contain certain self-defense mechanisms, such as poison or toxins.
 
-As shown by studies and other similar studies, accurate classification of mushrooms is crucial for preventing poisoning incidents. Many toxic mushroom species closely resemble edible varieties, making it easy for foragers to misidentify them. Thus, our research will focus on what physical features and environmental factors of mushrooms humans foragers can use to identify toxic/poisonous mushrooms in the wild. By conducting a research study on how to distinguish between safe and dangerous species, we can mitigate the incidence of mushroom poisoning and ensure safer foraging practices.
+Additionally, the habitat and season in which mushrooms are planted and grow may also affect whether they're poisonous. Different temperatures, humidity, and light can affect the production of toxins, which may also affect the edibility of mushrooms. By conducting a research study on how to distinguish between safe and dangerous species, we can mitigate the incidence of mushroom poisoning and ensure safer foraging practices.
 
 ### Research Question:
 
-What environmental factors and/or physical features of mushrooms help indicate that a wild mushroom is poisonous or edible?
-
-### Hypothesis:
-
-Mushrooms in the wild with obvious physical features like white gills, white rings, red caps, or red stems tend to be poisonous. These obvious physical traits are more likely to be spotted by animals, which would provide an evolutionary disadvantage unless they contain certain self-defense mechanisms, such as poison or toxins. Additionally, the habitat and season in which mushrooms are planted and grow may also affect whether they're poisonous. Different temperatures, humidity, and light can affect the production of toxins, which may also affect the edibility of mushrooms.
+What environmental factors and/or physical features of mushrooms indicate that a wild mushroom is poisonous or edible?
 
 ### Data Description:
 
-The data was curated on April 26, 1987, and submitted to the UCI by the National Audubon Society Field Guide. The National Audubon Society conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms. Their research incorporate a wide range of physical characteristics, including size, shape, color, and texture of the mushrooms. Additionally, they documented environmental factors such as the type of habitat and seasonal variations. Importantly, the study also focused on the toxicity of the mushrooms, noting which species were poisonous. This comprehensive dataset provides valuable insights into the relationship between mushrooms and their environments, contributing significantly to the understanding of the factors influencing mushroom toxicity.
+The data is based on an expansion of the UCI mushroom dataset, which was curated on April 26, 1987, and submitted by the National Audubon Society Field Guide. The National Audubon Society conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms. Their research incorporate a wide range of physical characteristics, as well as environmental factors such as the type of habitat and seasonal variations. Importantly, the study also focused on the toxicity of the mushrooms, noting which species were poisonous. In 2020, an effort was made to expand the data, capturing data from 173 species of mushrooms (as opposed to the original 23 species). This comprehensive dataset provides valuable insights into the relationship between mushrooms and their environments, contributing significantly to the understanding of the factors influencing mushroom toxicity.
 
 Our response variable is `class`, which is a qualitative variable labeled "e" for edible or "p" for poisonous.
 
@@ -189,7 +186,9 @@ ggplot(mushrooms, aes(x = cap.diameter)) +
     theme_minimal() +
     labs(title = "Cap diameter",
          x="Cap diameter")
+```
 
+```{r, eval=FALSE}
 mushrooms |>
   summarise(min = min(cap.diameter), 
             q1 = quantile(cap.diameter, 0.25), 
@@ -225,15 +224,15 @@ rownames(rotated_data) = rownames(rotated_data)
 rotated_data |> kable(digits=3) |> 
   kable_styling(font_size = 8)
 
-temp_data <- mushrooms |>
-  count(cap.color) |>
-  mutate(percentage = round(n / sum(n),3))
+# temp_data <- mushrooms |>
+#   count(cap.color) |>
+#   mutate(percentage = round(n / sum(n),3))
 
-rotated_data <- as.data.frame(t(temp_data[, -2]))  
-rownames(rotated_data) = rownames(rotated_data)
-colnames(rotated_data) = capcolorcodes
-rotated_data |> kable(digits=3) |> 
-  kable_styling(font_size = 8)
+# rotated_data <- as.data.frame(t(temp_data[, -2]))  
+# rownames(rotated_data) = rownames(rotated_data)
+# colnames(rotated_data) = capcolorcodes
+# rotated_data |> kable(digits=3) |> 
+#   kable_styling(font_size = 8)
 
 temp_data <- mushrooms |>
   count(habitat) |>
@@ -268,21 +267,21 @@ rotated_data |> kable(digits=3) |>
   kable_styling(font_size = 8)
 
 
-temp_data <- mushrooms |>
-  count(gill.color) |>
-  mutate(percentage = round(n / sum(n),3))
-
-rotated_data <- as.data.frame(t(temp_data[, -2]))
-colnames(rotated_data) = gillcolorcodes
-rownames(rotated_data) = rownames(rotated_data)
-rotated_data |> kable(digits=3) |> 
-  kable_styling(font_size = 8)
+# temp_data <- mushrooms |>
+#   count(gill.color) |>
+#   mutate(percentage = round(n / sum(n),3))
+# 
+# rotated_data <- as.data.frame(t(temp_data[, -2]))
+# colnames(rotated_data) = gillcolorcodes
+# rownames(rotated_data) = rownames(rotated_data)
+# rotated_data |> kable(digits=3) |> 
+#   kable_styling(font_size = 8)
 
 ```
 
 For qualitative variables, there appears to be more common physical and environmental characteristics. For example, for cap shape, flat and convex tends to be the most common; for stem color the most common is white, yellow, and brown; for habitat, woods is the most common. Thus, there are also characteristics which happen to be rarer, yet for some reason, natural selection has decided to preserve. These characteristics may have evolutionary advantageous properties (such as being poisonous), and we hope that they help us in our logistic regression model.
 
-```{r, fig.width=8, fig.height=8}
+```{r}
 #| label: bivariate EDA
 g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
     geom_boxplot() +
@@ -324,7 +323,7 @@ g6 <- ggplot(mushrooms, aes(x = season, fill = class)) +
 # season: spring=s, summer=u, autumn=a, winter=w",
 #                                                  gp = gpar(fontsize = 8)))
 
-grid.arrange(g1,g2,g3,g4,g5,g6)
+grid.arrange(g1,g2,g3,g5)
 ```
 
 Looking at this bivariate exploratory data analysis, we see that, on average, smaller cap diameters seem to be correlated with poisonous mushrooms. We also observe some categories with a large disparity between the number of edible and number of poisonous mushrooms, offering potential modeling power. For example, if we randomly select a mushroom with a cap shape of convex, bell, or others, it is more likely to be poisonous/toxic than edible. Similarly, we see that mushrooms with gill color of brown and yellow tends to be poisonous. However, in many cases, it is hard to accurately predict whether a mushroom is edible or poisonous based off just one characteristic, suggesting our model needs to incorporate multiple predictors and/or interaction terms.
@@ -339,79 +338,38 @@ ggplot(mushrooms, aes(x = habitat, fill = class)) +
   facet_wrap(~ season) +
   labs(title = "Edibility Distribution by Habitat and Season",
        x = "Habitat",
-       y = "Proportion of Edibility",
-       caption = "Habitat codes: grasses=g, leaves=l, meadows=m, paths=p, heaths=h, urban=u, waste=w, woods=d
-       Season codes: spring=s, summer=u, autumn=a, winter=w") +
+       y = "Proportion of Edibility") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 Looking at this graph, we see that mushrooms in certain habitats might only be edible during specific seasons. For example, mushrooms in the meadows are edible exclusively in the winter, but may be poisonous in other seasons. This suggests we may want to incorporate this interaction term into our final model.
 
-We were also interested in looking at the interaction between cap color and cap shape, as these are two of the characteristics which are most apparent to a potential predator and natural selection may have led to some traits evolving together.
-
-```{r, fig.width=8, fig.height=4}
-#| label: heatmap
-
-mushroom_prop <- mushrooms |>
-  group_by(cap.color, cap.shape) |> 
-  summarize(edible_count = sum(class == "e"),
-            poisonous_count = sum(class == "p")) |>
-  mutate(proportion_e_to_p = edible_count / poisonous_count) |>
-  select(cap.color, cap.shape, proportion_e_to_p)
-mushroom_prop <- mushroom_prop |>
-  mutate(log_prop = log(proportion_e_to_p))
-
-
-ggplot(mushroom_prop, aes(x = cap.color, y = cap.shape, 
-                          fill = log_prop)) +
-  geom_tile() +
-  labs(title = "Cap Color and Shape Combinations by Edibility",
-       subtitle = "Using log ratios of edible to poisonous mushrooms",
-       x = "Cap Color",
-       y = "Cap Shape",
-       fill = "log(e/p)") +
-  geom_tile(data = mushroom_prop |> filter(log_prop == -Inf),
-            aes(y = cap.shape, x = cap.color),
-            fill = "firebrick1") +
-  geom_tile(data = mushroom_prop |> filter(log_prop == Inf),
-            aes(y = cap.shape, x = cap.color),
-            fill = "darkseagreen2") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  geom_text(aes(label = case_when(
-                          log_prop == Inf ~ "e",
-                          log_prop == -Inf ~ "p",
-                          TRUE ~ as.character(round(log_prop, 1))),
-                color = case_when(
-                          log_prop == Inf ~ "always edible",
-                          log_prop == -Inf ~ "always poisonous",
-                          TRUE ~ "other")),
-            show.legend = TRUE) +
-  scale_color_manual(values = c("always edible" = "darkseagreen2", 
-                                "always poisonous" = "firebrick1", 
-                                "other" = "black"),
-                     name = "Edibility")
-```
-
-As the heatmap shows, certain combinations of cap color and cap shape are always edible or poisonous. Additionally, the log ratios across combinations of cap colors and cap sizes are varied with no pattern – for a mushroom with a sunken cap shape, it could be always edible (if the color is buff) to always poisonous (if the color is red). Similarly, if a mushroom is brown, it could be high likely it is edible (if the cap shape is conical) or likely it is poisonous (if the cap shape is bell). Thus, we may have to consider this interaction effect in our final model.
+We were also interested in looking at the interaction between cap color and cap shape, as these are two of the characteristics which are most apparent to a potential predator and natural selection may have led to some traits evolving together. A heatmap showing the interaction effect between these two variables can be found in the appendix.
 
 ## Methodology/Analysis
 
 ### Model Assumption:
 
-Based of our goals, a logistic regression was used. Below are the assumptions necessary for a logistic regression fit.
+Since we try to predict a binary outcome (edible or poisonous), we use a logistic regression model. Below are the assumptions necessary for a logistic regression fit.
 
--Linearity: The log-odds appears to have a linear relationship with the quantitative predictor (see appendix).
+-   Linearity: The log-odds appears to have a linear relationship with the quantitative predictor (see appendix for empirical logit plot).
 
--Randomness: The data were curated randomly in different places in North America, and thus we assume this condition is met.
+-   Randomness: The data were curated randomly in different places in North America, and thus we assume this condition is met.
 
--Independence: The observations are collected over a period of time, but in different regions and locations. For our analysis we assumed independent was met as the period did not span several years.
+-   Independence: The observations are collected over a period of time, but in different regions and locations. For our analysis we assumed independence was met as the period did not span several years.
 
 ### The base model:
 
-$$
-\log\left(\frac{\text{P}(\text{class = poisonous})}{\text{P}(\text{class = edible})}\right) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} + \beta_4 \cdot \text{cap.color} \\+ \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat}
-$$Predictor terms were chosen from the EDA and general physical or environmental factors that are generally understood and easy to evaluate by everyone. To determine if any predictors may not useful, we looked at coefficients from the tidy function with p-values greater than 0.01
+```{r}
+#| label: old-latex
+
+# $$
+# \log\left(\frac{\text{P}(\text{class = poisonous})}{\text{P}(\text{class = edible})}\right) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} + \beta_4 \cdot \text{cap.color} \\+ \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat}
+# $$
+```
+
+We fit a logistic regresion model predicting the binary response `class_binary` using predictors `cap.diameter`, `season`, `cap.shape`, `cap.color`, `gill.color`, `stem.color.modified`, `habitat.modified`. We chose predictor terms from the EDA and general physical or environmental factors that are generally understood and easy to evaluate. To determine if any predictors may not useful, we looked at coefficients from the tidy function with p-values greater than 0.01.
 
 ```{r}
 #| label: Tidy Table
@@ -438,23 +396,23 @@ main_model_modified <- glm(class_binary ~ cap.diameter + season + cap.shape + ca
 #(L_a <- glance(main_model_modified)$logLik)
 #(G <- -2 * (L_0 - L_a)) #LRT test statistic
 #(p_value <- pchisq(G, df = 3, lower.tail = FALSE))
-anova(null_model, main_model_modified, test = "Chisq") |> 
-  tidy() |> 
-  select(-df.residual) |>
-  kable(digits = 3) |> 
-  kable_styling(font_size = 8) |> 
-  column_spec(1, width = "3cm")
+
+temp <- anova(null_model, main_model_modified, test = "Chisq") |> 
+  tidy() 
+temp[2,1] = "our model"
+temp |> select(-df.residual) |>
+  kable(digits = 3)
 ```
 
 $$
-H_0: \beta_1,...,\beta_p = 0 \\ H_a: \beta_j \neq 0 \ for\ at\ least\ 1\ j
+H_0: \beta_1,...,\beta_p = 0 \hspace{3cm} H_a: \beta_j \neq 0 \ for\ at\ least\ 1\ j
 $$
 
-Since the p-value is small, and less than $\alpha = 0.05$, we reject the $H_0$. The data provide sufficient evidence of at least one non-zero coefficient in the model. The model coefficients and corresponding inferential statistics for our main model are shown in the appendix (see Table 13).
+Since the p-value is small, and less than $\alpha = 0.05$, we reject $H_0$. The data provide sufficient evidence of at least one non-zero coefficient in the model. The model coefficients and corresponding inferential statistics for our main model are shown in the appendix (Table 9).
 
 ### Interactive Terms
 
-As shown on our EDA, we hypothesized there may be some potential interaction terms. To determine the need for them in our model, we performed a drop in deviance test with the added interaction terms of `habitat*season` and `cap.shape*cap.color`.
+Our EDA showed evidence of potential interaction terms. To determine the need for them in our model, we performed a drop in deviance test with the added interaction terms of `habitat*season` and `cap.shape*cap.color`.
 
 ```{r}
 #| label: Drop-in-deviance Test
@@ -464,42 +422,47 @@ full_model <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
                     cap.shape*cap.color,
                     data = mushrooms, family = "binomial")
 
-anova(main_model_modified, full_model, test = "Chisq") |> 
+temp <- anova(main_model_modified, full_model, test = "Chisq") |> 
   tidy() |> 
-  select(-df.residual) |>
-  kable(digits = 3) |> 
-  kable_styling(font_size = 8) |> 
-  column_spec(1, width = "3cm")
+  select(-df.residual) 
+
+
+temp[1,1] = "reduced model"
+temp[2,1] = "full model (w/ interaction)"
+temp |>
+  kable(digits = 3)
 ```
 
-Since the p-value is low below $\alpha = 0.05$, we decide to include these interaction terms as there is convincing evidence that at least one of these interactive term coefficients are not 0 and thus helpful in the model.
-
-Additionally for the base model, the AIC is `{r} glance(main_model_modified)$AIC |> signif(digits=3)` and the BIC is `{r} glance(main_model_modified)$BIC |> signif(digits=3)`, whereas for the model with interaction effects, the AIC is `{r} glance(full_model)$AIC |> signif(digits=3)` and the BIC is `{r} glance(full_model)$BIC |> signif(digits=3)`. For both measures, the full model performs better (lower AIC/BIC).
+Since the p-value is low below $\alpha = 0.05$, we decide to include these interaction terms as there is convincing evidence that at least one of these interactive term coefficients are not 0 and thus helpful in the model. Additionally for the base model, the BIC is `{r} glance(main_model_modified)$BIC |> signif(digits=3)`, whereas for the model with interaction effects, the BIC is `{r} glance(full_model)$BIC |> signif(digits=3)`, also suggesting we should include the interaction terms (lower BIC).
 
 ## Model Results
 
 ### Final Model
 
-$$
-\log(\text{Odds(class = poisonous}) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} \\ 
-+
- \beta_4 \cdot \text{cap.color} + \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color.modified} + \beta_7 \cdot \text{habitat.modified} + \beta_8 \cdot (\text{habitat.modified} \cdot \text{season}) \\
- + \beta_9 \cdot (\text{cap.shape} \cdot \text{cap.color})
-$$Full model coefficient can be seen in appendix (see Table 14).
+```{r}
+# old latex code
 
-### Coefficient Interpretation:
+# $$
+# \log(\text{Odds(class = poisonous}) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} \\ 
+# +
+#  \beta_4 \cdot \text{cap.color} + \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color.modified} + \beta_7 \cdot \text{habitat.modified} + \beta_8 \cdot (\text{habitat.modified} \cdot \text{season}) \\
+#  + \beta_9 \cdot (\text{cap.shape} \cdot \text{cap.color})
+# $$
+```
 
-Below highlights some interesting coefficients for foragers to use to help them identify mushrooms that are more likely to be edible.
+Our final model is a logistic regression model predicting the binary response variable `class_binary` as a function of the following predictors: `cap.diameter`, `season`, `cap.shape`, `cap.color`, `gill.color`, `stem.color.modified`, `habitat.modified`, `habitat.modified*season`, and `cap.shape*cap.color`. Full model coefficients can be seen in the appendix (Table 10).
 
-\- The coefficient for cap diameter is -0.060, which means that for each 1 cm increase in the cap diameter, we expect the odds of the mushroom being poisonous multiplies by a factor of `{r} exp(-0.060)`, holding all else constant. In terms of odds, an increase in cap diameter decreases the odds of the mushroom being poisonous so the larger the cap diameter is the less likely the mushroom is poisonous.
+Below highlight some interesting coefficients for foragers to use to help them identify mushrooms that are more likely to be edible.
 
-\- The coefficient for cap shape p is -2.140. This suggests that, for mushrooms with a spherical cap shape (represented by "p"), we expect the odds of the mushroom being poisonous are `{r} exp(-2.140)` times the odds of being poisonous for mushrooms of bell shaped (baseline), granted all else are held constant. This value is also called the adjusted odds ratio. The odds of the mushroom being poisonous decrease significantly when the cap shape is "p" compared to the baseline and is also evident in the bivariate EDA as when cap shape is "bell", the mushroom tends to be poisonous.
+-   The coefficient for cap diameter is -0.060, which means that for each 1 cm increase in the cap diameter, we expect the odds of the mushroom being poisonous multiplies by a factor of `{r} exp(-0.060)`, holding all else constant; the larger the cap diameter is the less likely the mushroom is poisonous.
 
-\- The coefficient for the interaction term season(w) \* habitat.modified(g) is -1.026. This indicates that the combination of specific season (winter) and habitat (grasses) conditions modifies the expected odds of the mushroom being poisonous by a multiplicity factor of `{r} exp(-1.026)` times the odds of the mushroom being poisonous through an additive model of the same combination, while holding all other variables constant. This trend can be seen in the interactive term EDA as when season is winter and habitat is grasses we are more likely to observe an edible mushroom.
+-   The coefficient for cap shape p is -2.140, suggesting that for mushrooms with a spherical cap shape (represented by "p"), we expect the odds of the mushroom being poisonous are `{r} exp(-2.140)` times the odds of being poisonous for mushrooms of bell shaped (baseline), granted all else are held constant (ie the AOR = `{r} exp(-2.140)`). The odds of the mushroom being poisonous decrease significantly when the cap shape is "p" compared to the baseline and is also evident in the bivariate EDA as when cap shape is "bell", the mushroom tends to be poisonous.
+
+-   The coefficient for the interaction term season(w) \* habitat.modified(g) is -1.026. This indicates that the combination of specific season (winter) and habitat (grasses) conditions modifies the expected odds of the mushroom being poisonous by a multiplicity factor of `{r} exp(-1.026)` times the odds of the mushroom being poisonous through an additive model of the same combination, while holding all other variables constant. This trend can be seen in the interactive term EDA as when season is winter and habitat is grasses we are more likely to observe an edible mushroom.
 
 ### ROC curve
 
-```{r}
+```{r, fig.height=3}
 test_data$class_binary <- as.factor(test_data$class_binary)
 predicted_values <- predict(full_model, test_data, type = "response")
 test_data <- test_data |> 
@@ -508,17 +471,25 @@ test_data <- test_data |>
 roc_curve_data <- test_data |>
   roc_curve(class_binary, pred_prob, event_level = "second")
 autoplot(roc_curve_data)
+```
 
+```{r, eval=FALSE}
 test_data_aug <- augment(full_model, newdata = test_data)
 test_data_aug$class_binary <- as.factor(test_data_aug$class_binary)
 test_data_aug |>
   roc_auc(class_binary, .fitted, event_level = "second")
 ```
 
-```{r}
+```{r, eval=FALSE}
 roc_curve_data |>
   filter(sensitivity <= 0.9501) |>
   head(n=2)
+```
+
+The model is decent as the AUC is 0.797 which is closer to 1 than 0.5. We decided on a threshold of p = 0.247 to achieve a sensitivity of 95%, since we wanted to prioritize minimizing false negatives, which are more expensive – better to be careful than eat a poisonous mushroom classified as "edible".
+
+```{r, fig.height=2.5}
+#| label: confusion matrix
 
 threshold <- 0.247
 test_data <- test_data |> 
@@ -528,90 +499,31 @@ test_data <- test_data |>
       TRUE ~ 1
     )
   )
-```
-
-The model is decent as the AUC is 0.797 which is closer to 1 than 0.5. We decided on a threshold of p = 0.247 to achieve a sensitivity of 95%, since we wanted to prioritize minimizing false negatives, which are more expensive – better to be careful than eat a poisonous mushroom classified as "edible".
-
-```{r}
-#| label: confusion matrix
 
 test_data$pred_class <- as.factor(test_data$pred_class)
 conf_mat <- test_data |>
   yardstick::conf_mat(class_binary, pred_class)
 autoplot(conf_mat, type = "heatmap") +
   labs(
-    title = "Confusion matrix with p=0.247",
-    subtitle = "0: edible; 1: poisonous"
+    title = "Confusion matrix with p=0.247 -- 0: edible; 1: poisonous"
   )
 ```
 
-Using this threshold, we can evaluate our model's performance with a confusion matrix. As desired, for poisonous mushrooms, we are able to successfully classify 95% of them as poisonous. Our model struggles at correctly identifying mushrooms which are actually edible as edible, with a false positive rate of 73.7%. We were able to build a model that overall does much better (see appendix). However, this model requires many more variables, and becomes much more complex. For the purposes of this model, we wanted it to be applicable even in situations where humans found themselves having to assess edibility without many special tools or knowledge.
+Using this threshold, we can evaluate our model's performance with a confusion matrix. As desired, for poisonous mushrooms, we are able to successfully classify 95% of them as poisonous. Our model struggles at correctly identifying mushrooms which are actually edible as edible, with a false positive rate of 73.7%. We were able to build a model that overall does much better (see appendix). However, this model requires many more predictors and becomes much more complex. For the purposes of this model, we wanted it to be applicable even in situations where humans found themselves having to assess edibility without many special tools or knowledge.
 
-## Conclusion
+## Discussion + Conclusion
 
-There are many other significant predictors that helps in the identification of mushroom edibility, but among those that are most useful and easily interpretable, cap diameter, gill color, cap shape, cap color, and their interactions (e.g., habitat × season, cap shape × cap color) speaks the most on the probability of a mushroom being poisonous. We believe keeping a simple, parsimonious model with a high sensitivity was best for the context of our model's usefulness. Foragers are able to use the main effects model or interactive model or even take the general interpretation of the coefficients to identify the mushroom edibility.
+There are many other significant predictors that helps in the identification of mushroom edibility, but among those that are most useful and interpretable, cap diameter, gill color, cap shape, cap color, and their interactions (e.g., habitat × season, cap shape × cap color) speaks the most on the probability of a mushroom being poisonous. We believe keeping a simple, parsimonious model with a high sensitivity was best for the context of our model's usefulness. Foragers should be able to use the model to help identify mushroom edibility. For example, the interaction of winter (season) and grasses (habitat) reduces the odds of toxicity significantly. In general, mushrooms present in the winter seem less likely to be toxic. Further, larger cap diameters are generally associated with lower odds of being poisonous. The presence of any gill color besides "none" increases the odds of the mushroom being poisonous.
 
--   For example, the interaction of winter (season) and grasses (habitat) reduces the odds of toxicity significantly.
+The final model performed moderately well with an AUC of 0.797, achieving 95% sensitivity with a threshold of p = 0.247. However, while the final model (with interaction terms) seems to be useful (as proven by drop-in-deviance test and BIC), there are many coefficients which have high p-values, likely because scarcity in data of specific combinations, and so some of these predictors may not be use in practice.
 
--   Larger cap diameters are generally associated with lower odds of being poisonous.
+One limitation of our model is the high false positive rate, due to our decision to limit false negatives and improve safety for foragers. However, if a population of people are reliant on mushrooms as a critical food source, they may wish to be more liberal with classifying mushrooms as edible. Other limitations arise from the data, where some categories (e.g., rare gill, stem colors, and combinations of characteristics and environmental features) have sparse data. For these categories, we sometimes see high multicolinearity after running a VIF test (shown in appendix), which ends up inflating variances, biasing coefficients, and leading to predictors having coefficients with high p-values. Thus, some of these end up being very unreliable predictors. Further, the data is limited in how it represents mushrooms – the data is not able to represent mushrooms with features within the same category that occur simultaneously. For example, a mushroom's cap may be multiple colors, or its cap may be both shiny and smooth, but the dataset would only captures on of these characteristics. Lastly, the independence of observations for model assumption is assumed but not explicitly verified.
 
--   The final model performed well with an AUC of 0.797, achieving 95% sensitivity with a threshold of p = 0.247.
+Our analysis could be improved by addressing these concerns with sparse data and high multicollinearity. While it's unclear if the high multicollinearity for some of the categories is a direct cause of the sparse data, it would be immensely helpful to expand the dataset to improve data balance for rare categories through targeted sampling. If multicollinearity still exists, it may be simply because dependencies simply exist in the population (ie, certain gill colors are associated with certain cap colors).
 
--   It should be noted that although the additional interactive terms in the full model does seem to be useful despite adding complexity, it raises a lot of coefficient p-values due to the scarcity in data of specific combinations and therefore may not be best to use in practice.
+Further, our analysis may benefit from exploring other statistical techniques. The original paper the 2020 data was from found that the expanded dataset was not linearly separable, and so it would have been impossible to perfectly classify mushroom edibility through logistic regression [@wagnerheiderhattab2021]. They were able to achieve nearly perfect classification using random forests, so it may be worth leveraging similar techniques which can handle non-linear relationships while also remaining interpretable to see if we can achieve better prediction than our current model. For reference, their logistic regression model achieved an AUC of 0.85, but was more complex than ours.
 
-    -   **Model Fit**:
-
-        -   Logistic regression was appropriate for this binary classification problem.
-
-        -   Significance/Likelihood ratio test and Wald test (low observations was not an issue) was used to support the inclusion of the main model terms.
-
-        -   Drop-in-deviance test and reduced AIC/BIC values support the inclusion of interaction terms in the model. However, the inclusion of them led to low observation for some interactive coefficient making many of the coefficients uninterpretable in context for the interactive model.
-
-    -   **Predictor Significance**:
-
-        -   Many predictors in the main model showed high significance (p \< 0.05), suggesting their meaningful contribution to classifying mushrooms.
-
-        -   Interaction terms further improved the model, highlighting ecological relationships.
-
-### Limitations
-
-The dataset, collected in 1987 in North America, may not reflect contemporary mushroom populations or environmental changes and limits the model's generalization to other regions. Moreover, some categories (e.g., rare gill, stem colors, and combinations of characteristics and environmental features) have sparse data, potentially affecting the model's reliability. Lastly, the independence of observations for model assumption is assumed but not explicitly verified.
-
-------------------------------------------------------------------------
-
-### Suggestions for Improvement
-
-1.  **Data Collection**:
-
-    -   Include recent observations and expand the dataset to represent global mushroom species.
-
-    -   Improve data balance for rare categories through targeted sampling.
-
-2.  **Model Enhancements**:
-
-    -   Address multicollinearity by checking variance inflation factors (VIFs) for predictors with conceptual overlap.
-
-    -   Explore other statistical techniques (e.g., random forests or gradient boosting) for potentially higher accuracy and interpretability.
-
-3.  **Incorporate Additional Features**:
-
-    -   Include biochemical markers of toxicity, if available, to enhance classification power.
-
-------------------------------------------------------------------------
-
-### Future Work
-
-1.  **Validation on New Data**:
-
-    -   Test the model with mushrooms from other regions or under different environmental conditions to assess robustness.
-
-2.  **Integration with Technology**:
-
-    -   Develop a mobile application for real-time classification using the model.
-
-3.  **Safety Applications**:
-
-    -   Collaborate with public health organizations to create user-friendly guides or alerts for foragers.
+Future studies should also test the model with mushrooms from other regions or under different environmental conditions to assess robustness. Future applications of our model may also be possible to integrate our model with technology, with mobile applications that allow for real-time classification using the model. This may also allow for more complex models, if mobile devices are able to identify and measure characteristics which might be harder for humans. Finally, future works should focus on collaborating with public health organizations to create user-friendly guides or alerts for foragers, helping to make the model helps keep people safe.
 
 \pagebreak
 
@@ -679,6 +591,51 @@ ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
 ```
 
 Here, we look at multivariate exploratory data analysis including 2 predictors and our response variable. We visualize the effect of both stem width and stem height on the response variable, class. Interestingly, it seems like mushrooms with either high stem width or stem height seem to be edible. This suggests there may be some potential interaction effects between stem height and stem width – the low value of one alone does not seem to predict if the mushroom is poisonous, but requires the low value of both. However, in our model when we added this interaction effect, the performance did not include that drastically, and we deemed it more important to keep the model parsimonious as possible. Additionally, quantitative features can be hard to measure, and so may be less practical when serving as a general guideline for foraging mushrooms.
+
+```{r, fig.width=8, fig.height=4}
+#| label: heatmap
+
+mushroom_prop <- mushrooms |>
+  group_by(cap.color, cap.shape) |> 
+  dplyr::summarise(edible_count = sum(class == "e"),
+            poisonous_count = sum(class == "p")) |>
+  mutate(proportion_e_to_p = edible_count / poisonous_count) |>
+  select(cap.color, cap.shape, proportion_e_to_p)
+mushroom_prop <- mushroom_prop |>
+  mutate(log_prop = log(proportion_e_to_p))
+
+
+ggplot(mushroom_prop, aes(x = cap.color, y = cap.shape, 
+                          fill = log_prop)) +
+  geom_tile() +
+  labs(title = "Cap Color and Shape Combinations by Edibility",
+       subtitle = "Using log ratios of edible to poisonous mushrooms",
+       x = "Cap Color",
+       y = "Cap Shape",
+       fill = "log(e/p)") +
+  geom_tile(data = mushroom_prop |> filter(log_prop == -Inf),
+            aes(y = cap.shape, x = cap.color),
+            fill = "firebrick1") +
+  geom_tile(data = mushroom_prop |> filter(log_prop == Inf),
+            aes(y = cap.shape, x = cap.color),
+            fill = "darkseagreen2") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  geom_text(aes(label = case_when(
+                          log_prop == Inf ~ "e",
+                          log_prop == -Inf ~ "p",
+                          TRUE ~ as.character(round(log_prop, 1))),
+                color = case_when(
+                          log_prop == Inf ~ "always edible",
+                          log_prop == -Inf ~ "always poisonous",
+                          TRUE ~ "other")),
+            show.legend = TRUE) +
+  scale_color_manual(values = c("always edible" = "darkseagreen2", 
+                                "always poisonous" = "firebrick1", 
+                                "other" = "black"),
+                     name = "Edibility")
+```
+
+As the heatmap shows, certain combinations of cap color and cap shape are always edible or poisonous. Additionally, the log ratios across combinations of cap colors and cap sizes are varied with no pattern – for a mushroom with a sunken cap shape, it could be always edible (if the color is buff) to always poisonous (if the color is red). Similarly, if a mushroom is brown, it could be high likely it is edible (if the cap shape is conical) or likely it is poisonous (if the cap shape is bell). Thus, we may have to consider this interaction effect in our final model.
 
 \pagebreak
 
@@ -788,7 +745,14 @@ train_data |>
   ungroup()
 ```
 
-Here is the calculated empirical logit plot for our only quantitative predictor variable and it appears to generally fit the linearity assumption. For the other qualitative predictor variables the emperical logic was calculated for the training dataset.
+Here is the calculated empirical logit plot for our only quantitative predictor variable and it appears to generally fit the linearity assumption. For the other qualitative predictor variables the empirical logic was calculated for the training dataset.
+
+```{r}
+#| label: VIF
+vif(main_model_modified)
+```
+
+Above is the output from the `vif()` function ran on our main effects model. There are a few categories with high VIF (\>10), particularly some of the gill colors and cap colors, suggesting they may be correlated.
 
 \pagebreak
 
