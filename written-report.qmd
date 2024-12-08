@@ -185,8 +185,9 @@ ggplot(mushrooms, aes(x = cap.diameter)) +
     geom_histogram(fill = "skyblue", alpha = 0.9) +
   geom_vline(xintercept=mean(mushrooms$cap.diameter), color="red") +
     theme_minimal() +
-    labs(title = "Cap diameter",
-         x="Cap diameter")
+    labs(title = "Distribution of Cap Diameter",
+         x="Cap diameter",
+         y="Count")
 ```
 
 ```{r, eval=FALSE}
@@ -339,7 +340,8 @@ ggplot(mushrooms, aes(x = habitat, fill = class)) +
   facet_wrap(~ season) +
   labs(title = "Edibility Distribution by Habitat and Season",
        x = "Habitat",
-       y = "Proportion of Edibility") +
+       y = "Proportion of Edibility",
+       fill = "Class") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
@@ -492,7 +494,7 @@ conf_mat <- test_data |>
 plt2 <- autoplot(conf_mat, type = "heatmap") +
   labs(
     title = "Confusion matrix",
-    subtitle = "p = 0.247 (0: edible; 1: poisonous)"
+    subtitle = "p=0.247 (0-edible; 1-poisonous)"
   )
 
 #grid.arrange(plt1,plt2)
