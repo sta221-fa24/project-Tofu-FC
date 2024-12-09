@@ -60,7 +60,7 @@ test_data <- subset(mushrooms, split == FALSE)
 
 ### Project Motivation / Background:
 
-Mushrooms are vital to the general wellness of the ecosystem, decomposing and recycling the nutrients in the soil. Mushrooms also provide a valuable food source full of nutrients for human beings and other important organisms. However, some mushroom species can also be poisonous and harmful.
+Mushrooms play a crucial role in maintaining the health and balance of ecosystems worldwide. As nature's decomposers, they break down organic matter and facilitate nutrient cycling in the soil, making essential elements available for other organisms. These fascinating fungi also serve as a nutritious food source for humans and various wildlife, offering valuable proteins, vitamins, and minerals. However, it's important to note that while many mushroom species are beneficial, some can be deadly poisonous, making proper identification and caution essential when encountering wild mushrooms.
 
 The importance of this research has been highlighted in a multitude of studies. There have been over 130,000 reported cases of mushroom exposure from 1999 to 2016, with 704 of these incidents causing "major harm" and 52 being fatal [@brandenburgward2018]. Many of these cases are caused by the misidentification of edible mushroom species, and thus may be preventable through more accurate mushroom classification.
 
@@ -74,13 +74,13 @@ What environmental factors and/or physical features of mushrooms indicate that a
 
 ### Data Description:
 
-The data is based on an expansion of the UCI mushroom dataset, which was curated on April 26, 1987, and submitted by the National Audubon Society Field Guide. The National Audubon Society conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms. Their research incorporate a wide range of physical characteristics, as well as environmental factors such as the type of habitat and seasonal variations. Importantly, the study also focused on the toxicity of the mushrooms, noting which species were poisonous. In 2020, an effort was made to expand the data, capturing data from 173 species of mushrooms (as opposed to the original 23 species). This comprehensive dataset provides valuable insights into the relationship between mushrooms and their environments, contributing significantly to the understanding of the factors influencing mushroom toxicity.
+The dataset we used is an expansion of the UCI mushroom dataset, curated and submitted on April 26, 1987 by the National Audubon Society Field Guide. The publisher of the Field Guide, National Audubon Society, conducted extensive field research throughout North America, recording their observations on various aspects of mushrooms. Their research incorporate a wide range of physical characteristics, as well as environmental factors such as the type of habitat and seasonal variations. Importantly, the study also focused on the toxicity of the mushrooms, noting which species were poisonous. In 2020, an effort was made to expand the data, capturing data from 173 species of mushrooms (as opposed to the original 23 species). This comprehensive dataset provides valuable insights into the relationship between mushrooms and their environments, contributing significantly to the understanding of the factors influencing mushroom toxicity.
 
 Our response variable is `class`, which is a qualitative variable labeled "e" for edible or "p" for poisonous.
 
 Because we want our classifier to be easily used by people, and quantitative predictors can be harder to measure, we will focus on only one. That is `cap.diameter`, the diameter of the mushroom cap (cm).
 
-Key qualitative predictor variables include `cap.shape`, the shape of the mushroom cap; `gill.color`, the color of the fungi gills, `stem.color`, the color of the mushroom stem; `habitat`, the habitat that the mushroom is grown/found; and `season`, the season that the mushroom is grown/found. The key for the levels of each categorical variable are described on the following page and in the data dictionary.
+Key qualitative predictor variables include `cap.shape` (the shape of the mushroom cap), `gill.color` (the color of the fungi gills), `stem.color`(the color of the mushroom stem), `habitat` (the habitat that the mushroom is grown/found), and `season` (the season that the mushroom is grown/found). The key for the levels of each categorical variable are described on the following page and in the data dictionary.
 
 The data dictionary can be found [here](https://github.com/sta221-fa24/project-Tofu-FC/blob/main/data/README.md) [@wagnerheiderhattab2021]. There are 61069 total primary observations, each row represent a mushroom's physical features and also the environment it was found in. For the purpose of this project, the data was split into training and testing data.
 
