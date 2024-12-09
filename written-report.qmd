@@ -171,7 +171,7 @@ mushrooms |>
 # We were first interested in seeing the relationship between our continuous, quantitative variables. While not totally linear, with correlations of $0.423$ and $0.436$, they graphs seem to be somewhat linear, with some redundancy in their information. Thus, for the rest of the EDA we will focus mainly on visualizing cap.diameter. We may consider adding them back for the final model, but were more interested in seeing some of the EDA with the categorical variables. The mean cap diameter is 6.734cm, with a SD of 5.265cm. The mean stem height is 6.582cm, with a SD of 3.37cm. The mean stem width is 12.149cm, with a SD of 10.036cm.
 ```
 
-```{r,fig.width=6, fig.height=3}
+```{r,fig.width=6, fig.height=2.5}
 #| label: univariate predictor
 
 # mushrooms |>
@@ -283,7 +283,7 @@ rotated_data |> kable(digits=3) |>
 
 For qualitative variables, there appears to be more common physical and environmental characteristics. For example, for cap shape, flat and convex tends to be the most common; for stem color the most common is white, yellow, and brown; for habitat, woods is the most common. Thus, there are also characteristics which happen to be rarer, yet for some reason, natural selection has decided to preserve. These characteristics may have evolutionary advantageous properties (such as being poisonous), and we hope that they help us in our logistic regression model.
 
-```{r, fig.width = 8, fig.height = 5}
+```{r, fig.width = 8, fig.height = 4.5}
 #| label: bivariate EDA
 g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
     geom_boxplot() +
