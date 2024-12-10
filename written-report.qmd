@@ -82,7 +82,7 @@ Because we want our classifier to be easily used by people, and quantitative pre
 
 Key qualitative predictor variables include `cap.shape` (the shape of the mushroom cap), `gill.color` (the color of the fungi gills), `stem.color`(the color of the mushroom stem), `habitat` (the habitat that the mushroom is grown/found), and `season` (the season that the mushroom is grown/found). The key for the levels of each categorical variable are described on the following page and in the data dictionary.
 
-The data dictionary can be found [here](https://github.com/sta221-fa24/project-Tofu-FC/blob/main/data/README.md) [@wagnerheiderhattab2021]. There are 61069 total primary observations, each row represent a mushroom's physical features and also the environment it was found in. For the purpose of this project, the data was split into training and testing data.
+The data dictionary can be found [here](https://github.com/sta221-fa24/project-Tofu-FC/blob/main/data/README.md) [@wagnerheiderhattab2021]. There are 61069 total primary observations, each row represent a mushroom's physical features and also the environment it was found in. For the purpose of this project, the data was split into training (70%) and testing data (30%).
 
 ## Exploratory Data Analysis
 
