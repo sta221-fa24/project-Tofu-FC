@@ -49,6 +49,22 @@ mushrooms <- mushrooms |>
       habitat %in% c("d", "g") ~ habitat, TRUE ~ "Other")
   )
 
+# Simplified some more categorical variables to remove N/A in interactive model
+mushrooms <- mushrooms |>
+  mutate(
+    cap.shape.modified = case_when(
+      cap.shape %in% c("f", "s", "x", "b") ~ cap.shape, TRUE ~ "Other"),
+    stem.color.modified = case_when(
+      stem.color %in% c("w", "y", "n") ~ stem.color, TRUE ~ "Other"),
+    cap.color.modified = case_when(
+      cap.color %in% c("n", "w") ~ cap.color, TRUE ~ "Other"),
+    #Not necessary because there are no N/A, but this is better for human use
+    gill.color.modified = case_when(
+      gill.color %in% c("w", "y", "n", "p") ~ gill.color, TRUE ~ "Other"),
+    season.modified = case_when(
+      season %in% c("a", "w") ~ season, TRUE ~ "Other")
+  )
+
 #Split data into train and test
 set.seed(123)  # for reproducibility
 split <- sample.split(mushrooms$class_binary, SplitRatio = 0.7)
@@ -434,7 +450,7 @@ temp |>
   kable(digits = 3)
 ```
 
-Since the p-value is low below $\alpha = 0.05$, we decide to include these interaction terms as there is convincing evidence that at least one of these interactive term coefficients are not 0 and thus helpful in the model. Additionally for the base model, the BIC is `{r} glance(main_model_modified)$BIC |> signif(digits=3)`, whereas for the model with interaction effects, the BIC is `{r} glance(full_model)$BIC |> signif(digits=3)`, also suggesting we should include the interaction terms (lower BIC).
+Since the p-value is low below $\alpha = 0.05$, we decide to include these interaction terms as there is convincing evidence that at least one of these interactive term coefficients are not 0 and thus helpful in the model. Additionally for the base model, the BIC is `{r} glance(main_model_modified)$BIC |> signif(digits=3)`, whereas for the model with interaction effects, the BIC is `{r} glance(full_model)$BIC |> signif(digits=3)`, also suggesting we should include the interaction terms (lower BIC). However, a lot of the coefficients for the interactive terms are N/A's and we run into the same issue as the main effects model (no/lack of data values for particular interaction combinations). We transformed the rest of the categorical variables and the coefficients looked way better (Observe Table 11 vs. Table 12 in the appendix).
 
 ## Model Results
 
@@ -745,10 +761,25 @@ main_model_modified |>
 full_model |>
   tidy() |>
   kable(digits = 3,
-        caption = "Final Interactive Model Coefficients")
+        caption = "Interactive Model Coefficients")
 ```
 
 Interactive effects model's coefficient have a lot that are N/A's and high p-values for Wald test. In comparison the main effects model's coefficient tends to have low p-values for Wald test and enough data for each coefficient (observed in table 10 above). 
+
+\pagebreak
+
+```{r}
+full_model_modified <- glm(class_binary ~ cap.diameter + season.modified + cap.shape.modified + cap.color.modified +
+                    gill.color.modified + stem.color.modified + habitat.modified + habitat.modified*season.modified + 
+                    cap.shape.modified*cap.color.modified,
+                    data = mushrooms, family = "binomial")
+full_model_modified |>
+  tidy() |>
+  kable(digits = 3,
+        caption = "Final Interactive Model Coefficients")
+```
+
+To address N/A values in the interactive model, we decided to transformed the other categorical variables where there were a lack of data on specific combinations of predictor variables (this model has every predictor variable modified except for `cap.diameter`). As seen in the table, there are less coefficients that have high p-values and no coefficients that are N/A's. Additionally, reducing the number of coefficients ultimately helps ease the model use for human foragers. It should be noted that the "Others" category typically has high p-values because they incorporate many different characteristics of mushrooms that can be label as either edible or poisonous.
 
 \pagebreak
 
