@@ -12,7 +12,7 @@ bibliography: references.bib
 ---
 
 ```{r}
-#| label: load packages and data
+#| label: Load Packages and Data
 
 library(tidyverse)
 library(tidymodels)
@@ -105,14 +105,7 @@ The data dictionary can be found [here](https://github.com/sta221-fa24/project-T
 ## Exploratory Data Analysis
 
 ```{r}
-#| label: check rows
-
-# # Count the number of rows with at least one missing value
-# num_missing_rows <- sum(rowSums(is.na(mushrooms)) > 0)
-# cat("Number of rows with at least one missing value:", num_missing_rows, "\n")
-```
-
-```{r}
+#| label: Table of Distribution of Classes
 mushrooms |>
   count(class) |>
   mutate(percentage = round(n / sum(n),3)) |>
@@ -121,7 +114,7 @@ mushrooms |>
 ```
 
 ```{r, eval=FALSE}
-#| label: univariate response variable, summary statistics
+#| label: Univariate Response Variable, Summary Statistics
 
 #EDA Response (Categorical) Variable
 ggplot(mushrooms, aes(x = class, fill = class)) +
@@ -146,7 +139,7 @@ ggplot(mushrooms, aes(x = class, fill = class)) +
 Looking at the overall distribution of our response variable `class`, most of the mushrooms in our dataset seem to be poisonous ("p"). 33888 of the observations, or 55.5% of them are labeled poisonous, as opposed to 27181 (44.5%) of them as edible.
 
 ```{r, eval=FALSE}
-#| label: multicolinearity
+#| label: Multicolinearity
 
 mushrooms |>
   select(cap.diameter, stem.height, stem.width) |>
@@ -190,7 +183,7 @@ mushrooms |>
 ```
 
 ```{r,fig.width=6, fig.height=2.5}
-#| label: univariate predictor
+#| label: Univariate Quantitative Predictor
 
 # mushrooms |>
 #   ggplot(aes(x = cap.diameter)) + 
@@ -209,6 +202,7 @@ ggplot(mushrooms, aes(x = cap.diameter)) +
 ```
 
 ```{r, eval=FALSE}
+#| label: Cap Diameter Summary Stats
 mushrooms |>
   summarise(min = min(cap.diameter), 
             q1 = quantile(cap.diameter, 0.25), 
@@ -226,6 +220,7 @@ Visualizing the shape of our quantitative predictor, cap diameter, the distribut
 Since the rest of our predictors our qualitative, we report some of their distributions through the tables below:
 
 ```{r}
+#| label: Rest of the Qualitative Predictors
 capshapecodes <- c("bell", "conical", "flat", "other", "spherical", "sunken", "convex")
 capcolorcodes <- c("buff", "red", "gray", "black", "blue", "brown", "orange", "pink", "green", "purple", "white", "yellow")
 stemcolorcodes <- c("buff", "red", "none", "gray", "black", "blue", "brown", "orange", "pink", "green", "purple", "white", "yellow")
@@ -301,8 +296,8 @@ rotated_data |> kable(digits=3) |>
 
 For qualitative variables, there appears to be more common physical and environmental characteristics. For example, for cap shape, flat and convex tends to be the most common; for stem color the most common is white, yellow, and brown; for habitat, woods is the most common. Thus, there are also characteristics which happen to be rarer, yet for some reason, natural selection has decided to preserve. These characteristics may have evolutionary advantageous properties (such as being poisonous), and we hope that they help us in our logistic regression model.
 
-```{r, fig.width = 8, fig.height = 4.5}
-#| label: bivariate EDA
+```{r, fig.width = 8, fig.height = 3.5}
+#| label: Bivariate EDA
 g1 <- ggplot(mushrooms, aes(x = cap.diameter, color = class)) +
     geom_boxplot() +
     theme(legend.title = element_blank()) +
@@ -350,8 +345,8 @@ Looking at this bivariate exploratory data analysis, we see that, on average, sm
 
 One interaction term we were interested in looking at is `habitat*season`. Mushrooms that grow in the same habitat may have different toxicity classification depending on if being poisonous is needed to defend against predators. The number of predators themselves may vary depending on season, so season may change how habitat affects the log-odds of whether the mushroom is edible or poisonous.
 
-```{r, fig.width=8, fig.height=4}
-#| label: analysis of interaction
+```{r, fig.width=8, fig.height=3.5}
+#| label: Analysis of interaction
 
 ggplot(mushrooms, aes(x = habitat, fill = class)) +
   geom_bar(position = "fill") + 
@@ -382,18 +377,10 @@ Since we try to predict a binary outcome (edible or poisonous), we use a logisti
 
 ### Base Model
 
-```{r}
-#| label: old-latex
-
-# $$
-# \log\left(\frac{\text{P}(\text{class = poisonous})}{\text{P}(\text{class = edible})}\right) = \beta_0 + \beta_1 \cdot \text{cap.diameter} + \beta_2 \cdot \text{season} + \beta_3 \cdot \text{cap.shape} + \beta_4 \cdot \text{cap.color} \\+ \beta_5 \cdot \text{gill.color} + \beta_6 \cdot \text{stem.color} + \beta_7 \cdot \text{habitat}
-# $$
-```
-
 We fit a logistic regression model predicting the binary response `class_binary` using predictors `cap.diameter`, `season`, `cap.shape`, `cap.color`, `gill.color`, `stem.color`, `habitat`. We chose predictor terms from the EDA and general physical or environmental factors that are generally understood and easy to evaluate. To determine if any predictors may not useful, we looked at coefficients from the tidy function with p-values greater than 0.01.
 
 ```{r}
-#| label: Tidy Table
+#| label: Tidy Table for Base Model
 main_model <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
                     gill.color + stem.color + habitat, 
                     data = mushrooms, family = "binomial")
@@ -401,6 +388,8 @@ main_model |>
   tidy() |>
   filter(p.value > 0.01) |>
   kable(digits = 3)
+  #kable_styling(font_size = 8) |> 
+  #column_spec(1, width = "3cm")
 ```
 
 The Wald's Significance Tests for coefficients of multiple categories of the same predictor variables reveals that for certain categories there may be limited data (also seen through EDA) and/or limited predictive power. For simplicity of our model, we combine these categories into a general "Other" category. For example, `stem.color` of "w", "y", and "n" were kept while the other observations were assigned to a general "Other" category. For `habitat`, "d" and "g" were kept.
@@ -463,7 +452,8 @@ Since the p-value is low below $\alpha = 0.05$, we decide to include these inter
 
 ### Final Model
 
-Our final model is a logistic regression model predicting the binary response variable `class_binary` as a function of the following predictors: `cap.diameter`, `season.modified`, `cap.shape.modified`, `cap.color.modified`, `gill.color.modified`, `stem.color.modified`, `habitat.modified`, `habitat.modified*season.modified`, and `cap.shape.modified*cap.color.modified`. Full model coefficients can be seen in the appendix (Table 12).
+Our final model is a logistic regression model predicting the binary response variable `class_binary` as a function of the following predictors: `cap.diameter`, `season.modified`, `cap.shape.modified`, `cap.color.modified`, `gill.color.modified`, `stem.color.modified`, `habitat.modified`, `habitat.modified*season.modified`, and 
+`cap.shape.modified*cap.color.modified`. Full model coefficients can be seen in the appendix (Table 12).
 
 Below highlight some interesting coefficients for foragers to use to help them identify mushrooms that are more likely to be edible. Note the intercept is not useful in context since a mushroom cannot have a cap diameter of 0 cm.
 
@@ -476,6 +466,7 @@ Below highlight some interesting coefficients for foragers to use to help them i
 ### Model Evaluation
 
 ```{r, fig.height=3}
+#| label: ROC Curve 1
 test_data$class_binary <- as.factor(test_data$class_binary)
 predicted_values <- predict(full_model_modified, test_data, type = "response")
 test_data <- test_data |> 
@@ -487,6 +478,7 @@ plt1 <- autoplot(roc_curve_data) + ggtitle("ROC Curve")
 ```
 
 ```{r, eval=FALSE}
+#| label: AUC 1
 test_data_aug <- augment(full_model_modified, newdata = test_data)
 test_data_aug$class_binary <- as.factor(test_data_aug$class_binary)
 test_data_aug |>
@@ -494,13 +486,14 @@ test_data_aug |>
 ```
 
 ```{r, eval=FALSE}
+#| label: Finding Threshold 1
 roc_curve_data |>
   filter(sensitivity <= 0.9501) |>
   head(n=2)
 ```
 
-```{r}
-#| label: confusion matrix 1
+```{r, fig.height=4}
+#| label: Confusion Matrix 1
 
 threshold <- 0.294
 test_data <- test_data |> 
@@ -546,7 +539,7 @@ Future studies should also test the model with mushrooms from other regions or u
 ## Appendix
 
 ```{r, fig.width=8, fig.height=9}
-#| label: univariate predictors
+#| label: Full Univariate Predictors
 
 p1 <- ggplot(mushrooms, aes(x = cap.diameter)) +
     geom_histogram() +
@@ -602,7 +595,7 @@ Above is the output from the `vif()` function ran on our main effects model. The
 \pagebreak
 
 ```{r}
-#| label: multivariate EDA
+#| label: Multivariate EDA
 ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
   geom_point() +
   labs(
@@ -618,7 +611,7 @@ ggplot(mushrooms, aes(y = stem.height, x = stem.width, color = class)) +
 Here, we look at multivariate exploratory data analysis including 2 predictors and our response variable. We visualize the effect of both stem width and stem height on the response variable, class. Interestingly, it seems like mushrooms with either high stem width or stem height seem to be edible. This suggests there may be some potential interaction effects between stem height and stem width – the low value of one alone does not seem to predict if the mushroom is poisonous, but requires the low value of both. However, in our model when we added this interaction effect, the performance did not improve that drastically, and we deemed it more important to keep the model parsimonious as possible. Additionally, quantitative features can be hard to measure, and so may be less practical when serving as a general guideline for foraging mushrooms.
 
 ```{r, fig.width=8, fig.height=4}
-#| label: heatmap
+#| label: Heatmap for Interaction Term
 
 mushroom_prop <- mushrooms |>
   group_by(cap.color, cap.shape) |> 
@@ -665,7 +658,7 @@ As the heatmap shows, certain combinations of cap color and cap shape are always
 \pagebreak
 
 ```{r}
-#| label: Emperical logit
+#| label: Emperical Logit
 
 # Cap diameter analysis
 emplogitplot1(class_binary ~ cap.diameter, data = train_data, 
@@ -722,7 +715,7 @@ Here is the calculated empirical logit plot for our only quantitative predictor 
 \pagebreak
 
 ```{r}
-#| label: more interaction effects/vars?
+#| label: More Interaction Variables and Model Comparison
 
 full_model2 <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
                     gill.color + habitat + stem.root*stem.color + veil.type + veil.color +
@@ -756,6 +749,7 @@ Here, we played with adding more predictors to our model. We do achieve better R
 \pagebreak
 
 ```{r}
+#| label: Tidy Output for Final Main Model
 main_model_modified |>
   tidy() |>
   kable(digits = 3,
@@ -765,6 +759,7 @@ main_model_modified |>
 \pagebreak
 
 ```{r}
+#| label: Tidy Output for Interactive Model
 full_model |>
   tidy() |>
   kable(digits = 3,
@@ -776,17 +771,21 @@ Interactive effects model's coefficient have a lot that are N/A's and high p-val
 \pagebreak
 
 ```{r}
+#| label: Tidy Output for Final Interactive Model
 full_model_modified |>
   tidy() |>
   kable(digits = 3,
         caption = "Final Interactive Model Coefficients")
 ```
 
-To address N/A values in the interactive model, we decided to transformed the other categorical variables where there were a lack of data on specific combinations of predictor variables (this model has every predictor variable modified except for `cap.diameter`). As seen in the table, there are less coefficients that have high p-values and no coefficients that are N/A's. Additionally, reducing the number of coefficients ultimately helps ease the model use for human foragers. It should be noted that the "Others" category typically has high p-values because they incorporate many different characteristics of mushrooms that can be label as either edible or poisonous (in turn this makes the coefficients for "Others" less relevant in context of applicable use since some characters in others can solely be edible or poisonous). Since most of these have low p-values, we believe the coefficients that have the largest magnitude are the most helpful predictors of edibility.
+To address N/A values in the interactive model, we decided to transformed the other categorical variables where there were a lack of data on specific combinations of predictor variables (this model has every predictor variable modified except for `cap.diameter`). For cap shape "f", "s", "x", and "b" are kept. For stem color "w", "y", and "n" are kept. For cap color "n" and "w" are kept. For gill color "w", "y", "n", "p", and "f" are kept ("f" was releveled to the baseline). For season "a" and "w" are kept. Features that were kept were collapsed to "Others". For more information on these labels please refer to the data dictionary [here](https://github.com/sta221-fa24/project-Tofu-FC/blob/main/data/README.md). 
+
+As seen in the table, there are less coefficients that have high p-values and no coefficients that are N/A's. Additionally, reducing the number of coefficients ultimately helps ease the model use for human foragers. It should be noted that the "Others" category typically has high p-values because they incorporate many different characteristics of mushrooms that can be label as either edible or poisonous (in turn this makes the coefficients for "Others" less relevant in context of applicable use since some characters in others can solely be edible or poisonous). Since most of these have low p-values, we believe the coefficients that have the largest magnitude are the most helpful predictors of edibility.
 
 \pagebreak
 
 ```{r, fig.height=3}
+#| label: ROC Curve 2
 test_data$class_binary <- as.factor(test_data$class_binary)
 predicted_values <- predict(full_model, test_data, type = "response")
 test_data <- test_data |> 
@@ -798,6 +797,7 @@ plt3 <- autoplot(roc_curve_data) + ggtitle("ROC Curve")
 ```
 
 ```{r, eval=FALSE}
+#| label: AUC 2
 test_data_aug <- augment(full_model, newdata = test_data)
 test_data_aug$class_binary <- as.factor(test_data_aug$class_binary)
 test_data_aug |>
@@ -805,14 +805,14 @@ test_data_aug |>
 ```
 
 ```{r, eval=FALSE}
+#| label: Finding Threshold 2
 roc_curve_data |>
   filter(sensitivity <= 0.9501) |>
   head(n=2)
 ```
 
 ```{r}
-#| label: confusion matrix 2
-
+#| label: Confusion Matrix 2
 threshold <- 0.247
 test_data <- test_data |> 
   mutate(
