@@ -60,7 +60,7 @@ mushrooms <- mushrooms |>
       cap.color %in% c("n", "w") ~ cap.color, TRUE ~ "Other"),
     #Not necessary because there are no N/A, but this is better for human use
     gill.color.modified = case_when(
-      gill.color %in% c("w", "y", "n", "p") ~ gill.color, TRUE ~ "Other"),
+      gill.color %in% c("w", "y", "n", "p","f") ~ gill.color, TRUE ~ "Other"),
     season.modified = case_when(
       season %in% c("a", "w") ~ season, TRUE ~ "Other")
   )
@@ -448,6 +448,11 @@ temp[1,1] = "reduced model"
 temp[2,1] = "full model (w/ interaction)"
 temp |>
   kable(digits = 3)
+
+full_model_modified <- glm(class_binary ~ cap.diameter + season.modified + cap.shape.modified + cap.color.modified +
+                    gill.color.modified + stem.color.modified + habitat.modified + habitat.modified*season.modified + 
+                    cap.shape.modified*cap.color.modified,
+                    data = mushrooms, family = "binomial")
 ```
 
 Since the p-value is low below $\alpha = 0.05$, we decide to include these interaction terms as there is convincing evidence that at least one of these interactive term coefficients are not 0 and thus helpful in the model. Additionally for the base model, the BIC is `{r} glance(main_model_modified)$BIC |> signif(digits=3)`, whereas for the model with interaction effects, the BIC is `{r} glance(full_model)$BIC |> signif(digits=3)`, also suggesting we should include the interaction terms (lower BIC). However, a lot of the coefficients for the interactive terms are N/A's and we run into the same issue as the main effects model (no/lack of data values for particular interaction combinations). We transformed the rest of the categorical variables and the coefficients looked way better (Observe Table 11 vs. Table 12 in the appendix).
@@ -456,7 +461,7 @@ Since the p-value is low below $\alpha = 0.05$, we decide to include these inter
 
 ### Final Model
 
-Our final model is a logistic regression model predicting the binary response variable `class_binary` as a function of the following predictors: `cap.diameter`, `season`, `cap.shape`, `cap.color`, `gill.color`, `stem.color.modified`, `habitat.modified`, `habitat.modified*season`, and `cap.shape*cap.color`. Full model coefficients can be seen in the appendix (Table 11).
+Our final model is a logistic regression model predicting the binary response variable `class_binary` as a function of the following predictors: `cap.diameter`, `season.modified`, `cap.shape.modified`, `cap.color.modified`, `gill.color.modified`, `stem.color.modified`, `habitat.modified`, `habitat.modified*season.modified`, and `cap.shape.modified*cap.color.modified`. Full model coefficients can be seen in the appendix (Table 12).
 
 Below highlight some interesting coefficients for foragers to use to help them identify mushrooms that are more likely to be edible.
 
@@ -470,7 +475,7 @@ Below highlight some interesting coefficients for foragers to use to help them i
 
 ```{r, fig.height=3}
 test_data$class_binary <- as.factor(test_data$class_binary)
-predicted_values <- predict(full_model, test_data, type = "response")
+predicted_values <- predict(full_model_modified, test_data, type = "response")
 test_data <- test_data |> 
   mutate(pred_prob = predicted_values)
 
@@ -480,7 +485,7 @@ plt1 <- autoplot(roc_curve_data) + ggtitle("ROC Curve")
 ```
 
 ```{r, eval=FALSE}
-test_data_aug <- augment(full_model, newdata = test_data)
+test_data_aug <- augment(full_model_modified, newdata = test_data)
 test_data_aug$class_binary <- as.factor(test_data_aug$class_binary)
 test_data_aug |>
   roc_auc(class_binary, .fitted, event_level = "second")
@@ -493,9 +498,9 @@ roc_curve_data |>
 ```
 
 ```{r}
-#| label: confusion matrix
+#| label: confusion matrix 1
 
-threshold <- 0.247
+threshold <- 0.2919
 test_data <- test_data |> 
   mutate(
     pred_class = case_when(
@@ -510,21 +515,21 @@ conf_mat <- test_data |>
 plt2 <- autoplot(conf_mat, type = "heatmap") +
   labs(
     title = "Confusion matrix",
-    subtitle = "p=0.247 (0-edible; 1-poisonous)"
+    subtitle = "p=0.292 (0-edible; 1-poisonous)"
   )
 
 #grid.arrange(plt1,plt2)
 plt1 + plt2
 ```
-The final model was evaluated with the testing data. The model is decent as the AUC is 0.797 which is closer to 1 than 0.5. We decided on a threshold of p = 0.247 to achieve a sensitivity of 95%, since we wanted to prioritize minimizing false negatives, which are more expensive – better to be careful than eat a poisonous mushroom classified as "edible".
+The final interactive model was evaluated with the testing data. The model is better than guessing but still not super great as the AUC is 0.727 which is right in between 1 and 0.5. We decided on a threshold of p = 0.2919 to achieve a sensitivity of 95%, since we wanted to prioritize minimizing false negatives, which are more expensive – better to be careful than eat a poisonous mushroom classified as "edible".
 
-Using this threshold, we can evaluate our model's performance with a confusion matrix. As desired, for poisonous mushrooms, we are able to successfully classify 95% of them as poisonous. Our model struggles at correctly identifying mushrooms which are actually edible as edible, with a false positive rate of 73.7%. We were able to build a model that overall does much better (see appendix). However, this model requires many more predictors and becomes much more complex. For the purposes of this model, we wanted it to be applicable even in situations where humans found themselves having to assess edibility without many special tools or knowledge.
+Using this threshold, we can evaluate our model's performance with a confusion matrix. As desired, for poisonous mushrooms, we are able to successfully classify 95% of them as poisonous. Our model struggles at correctly identifying mushrooms which are actually edible as edible, with a false positive rate of 81.79%. We were able to build a model that overall does much better (see appendix). However, this model requires many more predictors and becomes much more complex. For the purposes of this model, we wanted it to be applicable even in situations where humans found themselves having to assess edibility without many special tools or knowledge. Moreover, the initial interactive model also produced slightly better results but becomes harder to use in context for human foragers (See Appendix).
 
 ## Discussion + Conclusion
 
-There are many other significant predictors that helps in the identification of mushroom edibility, but among those that are most useful and interpretable, cap diameter, gill color, cap shape, cap color, and their interactions (e.g., habitat × season, cap shape × cap color) speaks the most on the probability of a mushroom being poisonous. We believe keeping a simple, parsimonious model with a high sensitivity was best for the context of our model's usefulness. Foragers should be able to use the model to help identify mushroom edibility. For example, the interaction of winter (season) and grasses (habitat) reduces the odds of toxicity significantly. In general, mushrooms present in the winter seem less likely to be toxic. Further, larger cap diameters are generally associated with lower odds of being poisonous. The presence of any gill color besides "none" increases the odds of the mushroom being poisonous.
+There are many other significant predictors that helps in the identification of mushroom edibility, but among those that are most useful and interpretable, cap shape, gill color, cap diameter, cap color, and their interactions (e.g., habitat × season, cap shape × cap color) speaks the most on the probability of a mushroom being poisonous. We believe keeping a simple, parsimonious model with a high sensitivity was best for the context of our model's usefulness. Foragers should be able to use the model to help identify mushroom edibility. For example, the interaction of winter (season) and grasses (habitat) reduces the odds of toxicity significantly. In general, mushrooms present in the winter seem less likely to be toxic. Further, larger cap diameters are generally associated with lower odds of being poisonous. The presence of any gill color besides "none" increases the odds of the mushroom being poisonous (seen most evidently in the final main effect model coefficients).
 
-The final model performed moderately well with an AUC of 0.797, achieving 95% sensitivity with a threshold of p = 0.247. However, while the final model (with interaction terms) seems to be useful (as proven by drop-in-deviance test and BIC), there are many coefficients which have high p-values, likely because scarcity in data of specific combinations, and so some of these predictors may not be use in practice.
+The final interactive model performed decently with an AUC of 0.727, achieving 95% sensitivity with a threshold of p = 0.2919. However, while the final interactive model seems to be useful, there are many benefits using each type of model. For example, the final main effects model may be more useful in context due to relatively few terms and its interpretability (Table 10). In comparison, on the other end of the spectrum, the interactive with less modified coefficients has the best AUC, but high p-values and N/A's likely because of the scarcity in data of specific combinations, and so some of these predictors may not be use in practice (Table 11). In the middle of the spectrum is the final interaction model that takes account of simplicity, due to the transformation of categorical variables to include only the most common features/environment, and produces a somewhat decent AUC (Table 12).
 
 One limitation of our model is the high false positive rate, due to our decision to limit false negatives and improve safety for foragers. However, if a population of people are reliant on mushrooms as a critical food source, they may wish to be more liberal with classifying mushrooms as edible. Other limitations arise from the data, where some categories (e.g., rare gill, stem colors, and combinations of characteristics and environmental features) have sparse data. For these categories, we sometimes see high multicolinearity after running a VIF test (shown in appendix), which ends up inflating variances, biasing coefficients, and leading to predictors having coefficients with high p-values. Thus, some of these end up being very unreliable predictors. Further, the data is limited in how it represents mushrooms – the data is not able to represent mushrooms with features within the same category that occur simultaneously. For example, a mushroom's cap may be multiple colors, or its cap may be both shiny and smooth, but the dataset would only captures on of these characteristics. Lastly, the independence of observations for model assumption is assumed but not explicitly verified.
 
@@ -769,17 +774,66 @@ Interactive effects model's coefficient have a lot that are N/A's and high p-val
 \pagebreak
 
 ```{r}
-full_model_modified <- glm(class_binary ~ cap.diameter + season.modified + cap.shape.modified + cap.color.modified +
-                    gill.color.modified + stem.color.modified + habitat.modified + habitat.modified*season.modified + 
-                    cap.shape.modified*cap.color.modified,
-                    data = mushrooms, family = "binomial")
 full_model_modified |>
   tidy() |>
   kable(digits = 3,
         caption = "Final Interactive Model Coefficients")
 ```
 
-To address N/A values in the interactive model, we decided to transformed the other categorical variables where there were a lack of data on specific combinations of predictor variables (this model has every predictor variable modified except for `cap.diameter`). As seen in the table, there are less coefficients that have high p-values and no coefficients that are N/A's. Additionally, reducing the number of coefficients ultimately helps ease the model use for human foragers. It should be noted that the "Others" category typically has high p-values because they incorporate many different characteristics of mushrooms that can be label as either edible or poisonous.
+To address N/A values in the interactive model, we decided to transformed the other categorical variables where there were a lack of data on specific combinations of predictor variables (this model has every predictor variable modified except for `cap.diameter`). As seen in the table, there are less coefficients that have high p-values and no coefficients that are N/A's. Additionally, reducing the number of coefficients ultimately helps ease the model use for human foragers. It should be noted that the "Others" category typically has high p-values because they incorporate many different characteristics of mushrooms that can be label as either edible or poisonous. Since most of these have low p-values, we believe the coefficients that have the largest magnitude are the most helpful predictors of edibility.
+
+\pagebreak
+
+```{r, fig.height=3}
+test_data$class_binary <- as.factor(test_data$class_binary)
+predicted_values <- predict(full_model, test_data, type = "response")
+test_data <- test_data |> 
+  mutate(pred_prob = predicted_values)
+
+roc_curve_data <- test_data |>
+  roc_curve(class_binary, pred_prob, event_level = "second")
+plt3 <- autoplot(roc_curve_data) + ggtitle("ROC Curve")
+```
+
+```{r, eval=FALSE}
+test_data_aug <- augment(full_model, newdata = test_data)
+test_data_aug$class_binary <- as.factor(test_data_aug$class_binary)
+test_data_aug |>
+  roc_auc(class_binary, .fitted, event_level = "second")
+```
+
+```{r, eval=FALSE}
+roc_curve_data |>
+  filter(sensitivity <= 0.9501) |>
+  head(n=2)
+```
+
+```{r}
+#| label: confusion matrix 2
+
+threshold <- 0.247
+test_data <- test_data |> 
+  mutate(
+    pred_class = case_when(
+      pred_prob < threshold ~ 0,
+      TRUE ~ 1
+    )
+  )
+
+test_data$pred_class <- as.factor(test_data$pred_class)
+conf_mat <- test_data |>
+  yardstick::conf_mat(class_binary, pred_class)
+plt4 <- autoplot(conf_mat, type = "heatmap") +
+  labs(
+    title = "Confusion matrix",
+    subtitle = "p=0.247 (0-edible; 1-poisonous)"
+  )
+
+#grid.arrange(plt1,plt2)
+plt3 + plt4
+```
+
+This is the ROC curve and confusion matrix for the initial interactive model. The model here is slightly better than our final interactive model as the AUC is 0.797 which is closer to 1 than 0.5. If we keep the sensitivity at 95% the threshold would be p = 0.247. Our confusion matrix here indicates that of poisonous mushrooms, we are able to successfully classify 95% of them as poisonous. It also suggests that our model struggles at correctly identifying mushrooms which are actually edible as edible, with a false positive rate of 73.7% (lower than the flase positive rate of the final interactive model).
 
 \pagebreak
 
