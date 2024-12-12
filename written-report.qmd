@@ -410,8 +410,7 @@ temp |> select(-df.residual) |>
 
 $$
 H_0: \beta_1,...,\beta_p = 0 \hspace{3cm} H_a: \beta_j \neq 0 \ for\ at\ least\ 1\ j
-$$ 
-Since the p-value is small, and less than $\alpha = 0.05$, we reject $H_0$. The data provide sufficient evidence of at least one non-zero coefficient in the model. The model coefficients and corresponding Wald test inferential statistics for our main model provide better p-value than the unmodified base model (observe Table 10 in the appendix).
+$$ Since the p-value is small, and less than $\alpha = 0.05$, we reject $H_0$. The data provide sufficient evidence of at least one non-zero coefficient in the model. The model coefficients and corresponding Wald test inferential statistics for our main model provide better p-value than the unmodified base model (observe Table 10 in the appendix).
 
 ### Interactive Terms
 
@@ -486,7 +485,7 @@ roc_curve_data |>
   head(n=2)
 ```
 
-```{r, fig.height=2}
+```{r, fig.height=3.5}
 #| label: Confusion Matrix 1
 
 threshold <- 0.294
@@ -524,7 +523,7 @@ One limitation of our model is the high false positive rate, due to our decision
 
 Our analysis could be improved by addressing these concerns with sparse data and high multicollinearity. While it's unclear if the high multicollinearity for some of the categories is a direct cause of the sparse data, it would be immensely helpful to expand the dataset to improve data balance for rare categories through targeted sampling. If multicollinearity still exists, it may be simply because dependencies simply exist in the population (ie, certain gill colors are associated with certain cap colors).
 
-Further, our analysis may benefit from exploring other statistical techniques. The original paper the 2020 data was from found that the expanded dataset was not linearly separable, and so it would have been impossible to perfectly classify mushroom edibility through logistic regression [@wagnerheiderhattab2021]. They were able to achieve nearly perfect classification using random forests, so it may be worth leveraging similar techniques which can handle non-linear relationships while also remaining interpretable to see if we can achieve better prediction than our current model. For reference, their logistic regression model achieved an AUC of 0.85, but was more complex than ours.
+Further, our analysis may benefit from exploring other statistical techniques. The original paper the 2020 data was from found that the expanded dataset was not linearly separable, and so it would have been impossible to perfectly classify mushroom edibility through logistic regression [@wagnerheiderhattab2021]. They were able to achieve nearly perfect classification using random forests, so it may be worth leveraging similar techniques which can handle non-linear relationships while also remaining interpretable to see if we can achieve better prediction than our current model. For reference, their logistic regression model achieved an AUC of 0.85, but was more complex than ours. Unfortunately, the paper does not show their logistic regression model output (for comparison to ours), likely because the paper was mainly about expanding the dataset.
 
 Future studies should also test the model with mushrooms from other regions or under different environmental conditions to assess robustness. Future applications of our model may also be possible to integrate our model with technology, with mobile applications that allow for real-time classification using the model. This may also allow for more complex models, if mobile devices are able to identify and measure characteristics which might be harder for humans. Finally, future works should focus on collaborating with public health organizations to create user-friendly guides or alerts for foragers, helping to make the model helps keep people safe.
 
@@ -716,7 +715,7 @@ main_model |>
   kable(digits = 3, caption = "Base Main Model Coefficients Filtered")
 ```
 
-The base model tidy output with coefficients that have a p.value > 0.01 is shown here. To address these high p-value we collapsed some of the categorical variables into less levels.
+The base model tidy output with coefficients that have a p.value \> 0.01 is shown here. To address these high p-value we collapsed some of the categorical variables into less levels.
 
 \pagebreak
 
