@@ -248,17 +248,36 @@ create_dist_table <- function(data, variable, codes, caption) {
     kable(digits = 3, caption = caption) |>
     kable_styling(font_size = 6.5)
 }
+```
 
+For `cap_shape`:
+```{r}
+#| label: cap_shape
 # Create tables
 create_dist_table(mushrooms, cap.shape, codes$cap_shape, 
                  "Distribution of Mushroom Cap Shapes")
+```
+
+For `habitat`:
+```{r}
+#| label: habitat
 
 create_dist_table(mushrooms, habitat, codes$habitat, 
                  "Distribution of Mushroom Habitats")
 
+```
+
+For `season`:
+```{r}
+#| label: season
 create_dist_table(mushrooms, season, codes$season, 
                  "Distribution of Mushroom Seasons")
 
+```
+
+For `stem_color`:
+```{r}
+#| label: stem_color
 create_dist_table(mushrooms, stem.color, codes$stem_color, 
                  "Distribution of Mushroom Stem Colors")
 ```
@@ -312,7 +331,7 @@ grid.arrange(g1,g2,g3,g5)
 
 Looking at this bivariate exploratory data analysis, smaller cap diameters seem to be correlated with poisonous mushrooms on average. We also observe some categories with a large disparity between the number of edible and number of poisonous mushrooms, offering potential modeling power. For example, if we randomly select a mushroom with a cap shape of convex, bell, or others, it is more likely to be poisonous/toxic than edible. Similarly, mushrooms with gill color of brown and yellow tends to be poisonous. In many cases, however, it is hard to accurately predict whether a mushroom is edible or poisonous soley based on a single characteristic. This suggests that our model needs to incorporate multiple predictors and/or interaction terms.
 
-One interaction term we were interested in looking at is `habitat*season`. Mushrooms that grow in the same habitat may have different toxicity classification depending on if being poisonous is needed to defend against predators. The number of predators themselves may vary depending on season, so season may change how habitat affects the log-odds of whether the mushroom is edible or poisonous.
+One interaction term we discovered is `habitat*season`. Mushrooms growing in the same habitat may have different toxicity depending on whether poisonous is needed to defend against predators. As the number of predators varies by season, season can alter how habitat affects the log-odds of mushroom toxicity.
 
 ```{r, fig.width=8, fig.height=3.5}
 #| label: Analysis of interaction
@@ -417,6 +436,7 @@ temp[2,1] = "our model"
 temp |> select(-df.residual) |>
   kable(digits = 3)
 ```
+\vspace{-1em}
 $$
 H_0: \beta_1,...,\beta_p = 0 \hspace{3cm} H_a: \beta_j \neq 0 \ for\ at\ least\ 1\ j
 $$ Since the p-value is small, and less than $\alpha = 0.05$, we reject $H_0$. The data provide sufficient evidence of at least one non-zero coefficient in the model. The model coefficients and corresponding Wald test inferential statistics for our main model provide better p-value than the unmodified base model (see Table 10 in the appendix).
@@ -457,11 +477,11 @@ Our final model is a logistic regression model predicting the binary response va
 
 Below highlight some interesting coefficients for foragers to use to help them identify mushrooms that are more likely to be edible. Note the intercept is not useful in context since a mushroom cannot have a cap diameter of 0 cm.
 
--   The coefficient for cap diameter is -0.064, which means that for each 1 cm increase in the cap diameter, we expect the odds of the mushroom being poisonous multiplies by a factor of `{r} exp(-0.064)`, holding all else constant; broadly speaking the larger the cap diameter is the less likely the mushroom is poisonous.
+-   The coefficient for cap diameter is -0.064, which means that for each 1 cm increase in the cap diameter, we expect the odds of the mushroom being poisonous multiplies by a factor of 0.938, holding all else constant. Broadly speaking, the larger the cap diameter is the less likely the mushroom is poisonous.
 
--   The coefficient for cap shape f is -1.508, suggesting that for mushrooms with a flat cap shape (represented by "f"), we expect the odds of the mushroom being poisonous are `{r} exp(-1.508)` times the odds of being poisonous for mushrooms of bell shaped (baseline), granted all else are held constant (i.e. the AOR = `{r} exp(-1.508)`). The odds of the mushroom being poisonous decrease significantly when the cap shape is "p" compared to the baseline and is also evident in the bivariate EDA as when cap shape is "bell", the mushroom tends to be poisonous.
+-   The coefficient for cap shape f is -1.508, suggesting that for mushrooms with a flat cap shape (labled "f"), we expect the odds of the mushroom being poisonous are 0.221 times the odds of being poisonous for mushrooms of bell shaped (baseline), granted all else are held constant (AOR = 0.221. The odds of the mushroom being poisonous decrease significantly when the cap shape is "p" compared to the baseline. As shown in bivariate EDA, the mushroom tends to be poisonous when cap shape is "bell."
 
--   The coefficient for the interaction term season(w) \* habitat.modified(g) is -0.968. This indicates that the combination of specific season (winter) and habitat (grasses) conditions modifies the expected odds of the mushroom being poisonous by a multiplicity factor of `{r} exp(-0.968)` times the odds of the mushroom being poisonous through an additive model of the same combination, while holding all other variables constant. This trend can be seen in the interactive term EDA as when season is winter and habitat is grasses we are more likely to observe an edible mushroom.
+-   The coefficient for season(w) \* habitat.modified(g) is -0.968. This indicates that the combination of specific season (winter) and habitat (grasses) conditions modifies the expected odds of the mushroom being poisonous by a multiplicity factor of 0.380 times the odds of the mushroom being poisonous through an additive model of the same combination, while holding all other variables constant. This trend can be seen in the interactive term EDA as when season is winter and habitat is grasses we are more likely to observe an edible mushroom.
 
 ### Model Evaluation
 
