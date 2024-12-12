@@ -237,7 +237,7 @@ rotated_data <- as.data.frame(t(temp_data[, -2]))
 colnames(rotated_data) = capshapecodes
 rownames(rotated_data) = rownames(rotated_data)
 rotated_data |> kable(digits=3) |> 
-  kable_styling(font_size = 8)
+  kable_styling(font_size = 6.5)
 
 # temp_data <- mushrooms |>
 #   count(cap.color) |>
@@ -257,7 +257,7 @@ rotated_data <- as.data.frame(t(temp_data[, -2]))
 rownames(rotated_data) = rownames(rotated_data)
 colnames(rotated_data) = habitatcodes
 rotated_data |> kable(digits=3) |> 
-  kable_styling(font_size = 8)
+  kable_styling(font_size = 6.5)
 
 
 temp_data <- mushrooms |>
@@ -268,7 +268,7 @@ rotated_data <- as.data.frame(t(temp_data[, -2]))
 colnames(rotated_data) = seasoncodes
 rownames(rotated_data) = rownames(rotated_data)
 rotated_data |> kable(digits=3) |> 
-  kable_styling(font_size = 8)
+  kable_styling(font_size = 6.5)
 
 
 temp_data <- mushrooms |>
@@ -279,7 +279,7 @@ rotated_data <- as.data.frame(t(temp_data[, -2]))
 colnames(rotated_data) = stemcolorcodes
 rownames(rotated_data) = rownames(rotated_data)
 rotated_data |> kable(digits=3) |> 
-  kable_styling(font_size = 7)
+  kable_styling(font_size = 6.5)
 
 
 # temp_data <- mushrooms |>
@@ -377,19 +377,13 @@ Since we try to predict a binary outcome (edible or poisonous), we use a logisti
 
 ### Base Model
 
-We fit a logistic regression model predicting the binary response `class_binary` using predictors `cap.diameter`, `season`, `cap.shape`, `cap.color`, `gill.color`, `stem.color`, `habitat`. We chose predictor terms from the EDA and general physical or environmental factors that are generally understood and easy to evaluate. To determine if any predictors may not useful, we looked at coefficients from the tidy function with p-values greater than 0.01.
+We fit a logistic regression model predicting the binary response `class_binary` using predictors `cap.diameter`, `season`, `cap.shape`, `cap.color`, `gill.color`, `stem.color`, `habitat`. We chose predictor terms from the EDA and general physical or environmental factors that are generally understood and easy to evaluate. To determine if any predictors may not useful, we looked at coefficients from the tidy function with p-values greater than 0.01 (see Table 8 in the appendix).
 
 ```{r}
-#| label: Tidy Table for Base Model
+#| label: Initialize Base Model
 main_model <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
                     gill.color + stem.color + habitat, 
                     data = mushrooms, family = "binomial")
-main_model |>
-  tidy() |>
-  filter(p.value > 0.01) |>
-  kable(digits = 3)
-  #kable_styling(font_size = 8) |> 
-  #column_spec(1, width = "3cm")
 ```
 
 The Wald's Significance Tests for coefficients of multiple categories of the same predictor variables reveals that for certain categories there may be limited data (also seen through EDA) and/or limited predictive power. For simplicity of our model, we combine these categories into a general "Other" category. For example, `stem.color` of "w", "y", and "n" were kept while the other observations were assigned to a general "Other" category. For `habitat`, "d" and "g" were kept.
@@ -413,9 +407,10 @@ temp[2,1] = "our model"
 temp |> select(-df.residual) |>
   kable(digits = 3)
 ```
+
 $$
 H_0: \beta_1,...,\beta_p = 0 \hspace{3cm} H_a: \beta_j \neq 0 \ for\ at\ least\ 1\ j
-$$
+$$ 
 Since the p-value is small, and less than $\alpha = 0.05$, we reject $H_0$. The data provide sufficient evidence of at least one non-zero coefficient in the model. The model coefficients and corresponding Wald test inferential statistics for our main model provide better p-value than the unmodified base model (observe Table 10 in the appendix).
 
 ### Interactive Terms
@@ -452,8 +447,7 @@ Since the p-value is low below $\alpha = 0.05$, we decide to include these inter
 
 ### Final Model
 
-Our final model is a logistic regression model predicting the binary response variable `class_binary` as a function of the following predictors: `cap.diameter`, `season.modified`, `cap.shape.modified`, `cap.color.modified`, `gill.color.modified`, `stem.color.modified`, `habitat.modified`, `habitat.modified*season.modified`, and 
-`cap.shape.modified*cap.color.modified`. Full model coefficients can be seen in the appendix (Table 12).
+Our final model is a logistic regression model predicting the binary response variable `class_binary` as a function of the following predictors: `cap.diameter`, `season.modified`, `cap.shape.modified`, `cap.color.modified`, `gill.color.modified`, `stem.color.modified`, `habitat.modified`, `habitat.modified`\*`season.modified`, and `cap.shape.modified` \*`cap.color.modified`. Full model coefficients can be seen in the appendix (Table 12).
 
 Below highlight some interesting coefficients for foragers to use to help them identify mushrooms that are more likely to be edible. Note the intercept is not useful in context since a mushroom cannot have a cap diameter of 0 cm.
 
@@ -465,7 +459,7 @@ Below highlight some interesting coefficients for foragers to use to help them i
 
 ### Model Evaluation
 
-```{r, fig.height=3}
+```{r, fig.height=2}
 #| label: ROC Curve 1
 test_data$class_binary <- as.factor(test_data$class_binary)
 predicted_values <- predict(full_model_modified, test_data, type = "response")
@@ -492,7 +486,7 @@ roc_curve_data |>
   head(n=2)
 ```
 
-```{r, fig.height=4}
+```{r, fig.height=2}
 #| label: Confusion Matrix 1
 
 threshold <- 0.294
@@ -513,12 +507,12 @@ plt2 <- autoplot(conf_mat, type = "heatmap") +
     subtitle = "p=0.292 (0-edible; 1-poisonous)"
   )
 
-#grid.arrange(plt1,plt2)
 plt1 + plt2
 ```
+
 The final interactive model was evaluated with the testing data. The model is better than guessing but still not super great as the AUC is 0.728 which is right in between 1 and 0.5. We decided on a threshold of p = 0.294 to achieve a sensitivity of 95%, since we wanted to prioritize minimizing false negatives, which are more expensive – better to be careful than eat a poisonous mushroom classified as "edible".
 
-Using this threshold, we can evaluate our model's performance with a confusion matrix. As desired, for poisonous mushrooms, we are able to successfully classify 95% of them as poisonous. Our model struggles at correctly identifying mushrooms which are actually edible as edible, with a false positive rate of ~81%. We were able to build a model that overall does much better (see appendix). However, this model requires many more predictors and becomes much more complex. For the purposes of this model, we wanted it to be applicable even in situations where humans found themselves having to assess edibility without many special tools or knowledge. Moreover, the initial interactive model also produced slightly better results but becomes harder to use in context for human foragers (see appendix).
+Using this threshold, we can evaluate our model's performance with a confusion matrix. As desired, for poisonous mushrooms, we are able to successfully classify 95% of them as poisonous. Our model struggles at correctly identifying mushrooms which are actually edible as edible, with a false positive rate of \~81%. We were able to build a model that overall does much better (see appendix). However, this model requires many more predictors and becomes much more complex. For the purposes of this model, we wanted it to be applicable even in situations where humans found themselves having to assess edibility without many special tools or knowledge. Moreover, the initial interactive model also produced slightly better results but becomes harder to use in context for human foragers (see appendix).
 
 ## Discussion + Conclusion
 
@@ -715,6 +709,18 @@ Here is the calculated empirical logit plot for our only quantitative predictor 
 \pagebreak
 
 ```{r}
+#| label: Tidy Table for Base Model
+main_model |>
+  tidy() |>
+  filter(p.value > 0.01) |>
+  kable(digits = 3, caption = "Base Main Model Coefficients Filtered")
+```
+
+The base model tidy output with coefficients that have a p.value > 0.01 is shown here. To address these high p-value we collapsed some of the categorical variables into less levels.
+
+\pagebreak
+
+```{r}
 #| label: More Interaction Variables and Model Comparison
 
 full_model2 <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color +
@@ -729,7 +735,7 @@ full_model3 <- glm(class_binary ~ cap.diameter + season + cap.shape + cap.color 
                    data = mushrooms, family="binomial")
 anova(full_model2, full_model3, test = "Chisq") |> 
   tidy() |> 
-  kable(digits = 3, escape = TRUE) |> 
+  kable(digits = 3, escape = TRUE, caption = "ANOVA Table for Drop-in-Deviance Test") |> 
   kable_styling(font_size = 8) |> 
   column_spec(1, width = "3cm")
 
@@ -766,7 +772,7 @@ full_model |>
         caption = "Interactive Model Coefficients")
 ```
 
-Interactive effects model's coefficient have a lot that are N/A's and high p-values for Wald test. In comparison the main effects model's coefficient tends to have low p-values for Wald test and enough data for each coefficient (observed in table 10 above). 
+Interactive effects model's coefficient have a lot that are N/A's and high p-values for Wald test. In comparison the main effects model's coefficient tends to have low p-values for Wald test and enough data for each coefficient (observed in Table 10 above).
 
 \pagebreak
 
@@ -778,7 +784,7 @@ full_model_modified |>
         caption = "Final Interactive Model Coefficients")
 ```
 
-To address N/A values in the interactive model, we decided to transformed the other categorical variables where there were a lack of data on specific combinations of predictor variables (this model has every predictor variable modified except for `cap.diameter`). For cap shape "f", "s", "x", and "b" are kept. For stem color "w", "y", and "n" are kept. For cap color "n" and "w" are kept. For gill color "w", "y", "n", "p", and "f" are kept ("f" was releveled to the baseline). For season "a" and "w" are kept. Features that were kept were collapsed to "Others". For more information on these labels please refer to the data dictionary [here](https://github.com/sta221-fa24/project-Tofu-FC/blob/main/data/README.md). 
+To address N/A values in the interactive model, we decided to transformed the other categorical variables where there were a lack of data on specific combinations of predictor variables (this model has every predictor variable modified except for `cap.diameter`). For cap shape "f", "s", "x", and "b" are kept. For stem color "w", "y", and "n" are kept. For cap color "n" and "w" are kept. For gill color "w", "y", "n", "p", and "f" are kept ("f" was releveled to the baseline). For season "a" and "w" are kept. Features that were kept were collapsed to "Others". For more information on these labels please refer to the data dictionary [here](https://github.com/sta221-fa24/project-Tofu-FC/blob/main/data/README.md).
 
 As seen in the table, there are less coefficients that have high p-values and no coefficients that are N/A's. Additionally, reducing the number of coefficients ultimately helps ease the model use for human foragers. It should be noted that the "Others" category typically has high p-values because they incorporate many different characteristics of mushrooms that can be label as either edible or poisonous (in turn this makes the coefficients for "Others" less relevant in context of applicable use since some characters in others can solely be edible or poisonous). Since most of these have low p-values, we believe the coefficients that have the largest magnitude are the most helpful predictors of edibility.
 
