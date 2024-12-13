@@ -8,7 +8,7 @@ execute:
   message: false
   echo: false
 editor: visual
-bibliography: references.bib
+bibliography: references/references.bib
 ---
 
 ```{r}
